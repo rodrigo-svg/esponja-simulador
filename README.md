@@ -8,7 +8,6 @@ Simulador de una esponja cilíndrica seca, para estimar cómo responde un materi
 
 - **Banco 2D (elementos finitos axisimétricos):** un punzón plano hunde el cilindro a 100 mm/min, se retira y la esponja se recupera. Curva fuerza–hundimiento, histéresis y recuperación en el tiempo.
 - **Vista de poros:** toca una zona del corte para ver cómo se deforma y pandea cada poro según la carga local.
-- **Banco 3D interactivo:** mueve el punzón en cualquier dirección; la esponja está suelta en el suelo con roce y puede deslizarse, inclinarse o romperse.
 - **Ambiente:** la temperatura y la humedad cambian la rigidez del sólido y los tiempos de recuperación.
 - **Ficha de material editable** para estimar otros materiales.
 
@@ -18,7 +17,7 @@ Simulador de una esponja cilíndrica seca, para estimar cómo responde un materi
 - Hiperespuma de Storåkers con coeficiente de Poisson ajustable.
 - Efecto Mullins (Ogden–Roxburgh) y viscoelasticidad de Prony.
 - Humedad del sólido por isoterma GAB, transición vítrea por Gordon–Taylor y tiempos por WLF/Arrhenius.
-- Criterio de ruptura por estiramiento máximo.
+- Criterio de ruptura por estiramiento máximo: marca dónde se desgarraría la espuma.
 
 Verificado contra la compresión uniforme exacta y contra la solución de Boussinesq para punzón plano.
 

@@ -1,0 +1,2581 @@
+<title>Esponja bajo Punzón</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: banco de ensayo — controles a la izquierda, probeta y curvas al centro, ficha técnica completa abajo. */
+:root {
+  --bg: #eceeea; --surface: #f8f9f6; --ink: #1c2220; --muted: #5a6560; --line: #cdd3ce; --accent: #2c5a78; --accent-ink: #ffffff;
+  --punch: #2a2f31; --load: #b04f1d; --unload: #2c5a78; --warn: #9a5b00; --warn-bg: #fbecd0; --ok: #2f6b43; --ok-bg: #dcefe2; --info-bg: #e2ebf2;
+  --rupture: #c0281d; --rupture-bg: #fde7e4; --rupture-ink: #4a0f0a;
+  --foam0: #f4e9bd; --foam1: #e8c766; --foam2: #c9812e; --foam3: #6f3418;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #131716; --surface: #1b201e; --ink: #e5eae7; --muted: #98a39e; --line: #2e3633; --accent: #86b6d6; --accent-ink: #0d1a22;
+  --punch: #8d979b; --load: #e88b55; --unload: #86b6d6; --warn: #f0b55a; --warn-bg: #3a2b12; --ok: #79c495; --ok-bg: #16301f; --info-bg: #1c2a34;
+  --rupture: #ff7a6b; --rupture-bg: #3a1512; --rupture-ink: #ffd9d4;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #131716; --surface: #1b201e; --ink: #e5eae7; --muted: #98a39e; --line: #2e3633; --accent: #86b6d6; --accent-ink: #0d1a22;
+  --punch: #8d979b; --load: #e88b55; --unload: #86b6d6; --warn: #f0b55a; --warn-bg: #3a2b12; --ok: #79c495; --ok-bg: #16301f; --info-bg: #1c2a34;
+  --rupture: #ff7a6b; --rupture-bg: #3a1512; --rupture-ink: #ffd9d4;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 56px; display: grid; gap: 22px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(28px, 4.2vw, 42px); font-weight: 780; font-stretch: 118%; letter-spacing: -0.01em; line-height: 1.05; }
+h2 { font-size: 22px; font-weight: 720; font-stretch: 110%; }
+h3 { font-size: 15px; font-weight: 700; font-stretch: 105%; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 70ch; margin-top: 6px; }
+.label { font-family: var(--f-display); font-size: 11.5px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-stretch: 112%; }
+.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+.bench { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.controls { padding: 16px; display: grid; gap: 18px; }
+.group { display: grid; gap: 10px; }
+.group + .group { border-top: 1px solid var(--line); padding-top: 16px; }
+.field { display: grid; gap: 4px; }
+.field-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.field-row label { font-weight: 500; font-size: 14px; }
+.field-row output { font-family: var(--f-mono); font-size: 13px; color: var(--ink); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+select, input[type="number"], textarea { font: inherit; font-size: 14px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; width: 100%; min-width: 0; }
+input[type="number"] { font-family: var(--f-mono); font-size: 13px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 2px 0; }
+select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg button { font: inherit; font-size: 13.5px; padding: 7px 6px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn { font: inherit; font-weight: 600; font-size: 14.5px; padding: 10px 14px; border-radius: 4px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.btn[disabled] { opacity: 0.6; cursor: progress; }
+.btn.ghost { background: transparent; color: var(--accent); font-weight: 500; padding: 7px 12px; font-size: 13.5px; }
+.hint { font-size: 12.5px; color: var(--muted); }
+
+.stage { display: grid; gap: 16px; min-width: 0; }
+.viz { padding: 14px; display: grid; gap: 10px; }
+.viz-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.phase { font-family: var(--f-mono); font-size: 13px; color: var(--muted); }
+.canvas-box { position: relative; width: 100%; aspect-ratio: 16 / 10; max-width: 100%; }
+@media (max-width: 640px) { .canvas-box { aspect-ratio: 1 / 1; } }
+.canvas-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: transparent; }
+.progress span { display: block; height: 100%; background: var(--accent); width: 0; transition: width 0.15s; }
+.play { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.play button { font: inherit; font-size: 13px; font-weight: 600; width: 78px; padding: 6px 0; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.legend { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.legend .bar { height: 10px; width: 180px; max-width: 45vw; border-radius: 2px; background: linear-gradient(90deg, var(--foam0), var(--foam1) 30%, var(--foam2) 70%, var(--foam3)); }
+.legend .ticks { display: flex; justify-content: space-between; width: 180px; max-width: 45vw; font-size: 11px; }
+
+.viz-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 18px; align-items: start; }
+@media (max-width: 1100px) { .viz-grid { grid-template-columns: minmax(0, 1fr); } }
+.viz-main, .micro { display: grid; gap: 8px; min-width: 0; }
+.micro { padding-left: 18px; border-left: 1px solid var(--line); }
+@media (max-width: 1100px) { .micro { padding-left: 0; border-left: 0; padding-top: 14px; border-top: 1px solid var(--line); } }
+.micro-box { position: relative; width: 100%; max-width: 440px; aspect-ratio: 1 / 1; justify-self: center; border-radius: 4px; overflow: hidden; background: var(--bg); }
+.micro-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+#cv { cursor: crosshair; }
+.mread { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; }
+.mread .prop .v { font-size: 13.5px; }
+.mread .wide { grid-column: 1 / -1; }
+.mread .wide .v { font-family: var(--f-body); }
+#poreInfo { min-height: 2.6em; }
+
+.b3 { padding: 16px; display: grid; gap: 14px; }
+.b3-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.b3-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .b3-grid { grid-template-columns: minmax(0, 1fr); } }
+.b3-view { display: grid; gap: 12px; min-width: 0; }
+.b3-box { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 4px; overflow: hidden; background: var(--bg); touch-action: none; }
+@media (max-width: 640px) { .b3-box { aspect-ratio: 1 / 1; } }
+.b3-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; }
+.b3-box canvas.drag { cursor: grabbing; }
+.b3-tip { position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: 12px; color: var(--muted); pointer-events: none; }
+.b3-ctl { display: grid; gap: 16px; }
+.b3-alert { position: absolute; top: 10px; left: 10px; max-width: min(360px, calc(100% - 20px)); display: grid; gap: 6px; padding: 10px 12px; border-radius: 4px; background: var(--rupture-bg); color: var(--rupture-ink); border: 1px solid var(--rupture); font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.b3-alert[hidden] { display: none; }
+.b3-alert strong { font-family: var(--f-display); font-size: 15px; font-stretch: 110%; color: var(--rupture); }
+.b3-alert.warn { background: var(--warn-bg); border-color: var(--warn); color: var(--ink); }
+.b3-alert.warn strong { color: var(--warn); }
+.b3-alert button { justify-self: start; font: inherit; font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 4px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; }
+.b3-ctl .seg button { font-size: 12.5px; }
+.b3-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat { background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.stat .v { font-family: var(--f-mono); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat .s { font-size: 12.5px; color: var(--muted); }
+
+.charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .charts { grid-template-columns: minmax(0, 1fr); } }
+.chart { padding: 12px 14px 8px; display: grid; gap: 4px; min-width: 0; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .key { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+.chart .key i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+svg text { fill: var(--muted); font-family: var(--f-mono); font-size: 10.5px; }
+svg .grid { stroke: var(--line); stroke-width: 1; }
+svg .axis { stroke: var(--muted); stroke-width: 1; }
+
+.props { padding: 14px 16px; display: grid; gap: 12px; }
+.prop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 18px; }
+.prop { display: grid; gap: 1px; min-width: 0; }
+.prop .v { font-family: var(--f-mono); font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: 12.5px; padding: 3px 9px; border-radius: 999px; background: var(--info-bg); color: var(--ink); }
+.chip.ok { background: var(--ok-bg); color: var(--ok); font-weight: 500; }
+.chip.warn { background: var(--warn-bg); color: var(--warn); font-weight: 500; }
+.notes { display: grid; gap: 6px; font-size: 13.5px; }
+.notes p { padding-left: 12px; border-left: 2px solid var(--warn); color: var(--ink); }
+
+.below { display: grid; gap: 18px; margin-top: 10px; padding-top: 26px; border-top: 1px solid var(--line); }
+.below-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.pgroups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 860px) { .pgroups { grid-template-columns: minmax(0, 1fr); } }
+.pgroup { padding: 14px 16px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.pgroup > p { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) 108px; gap: 4px 12px; padding: 9px 0; border-top: 1px solid var(--line); align-items: start; }
+.prow .nm { font-weight: 500; font-size: 14px; }
+.prow .nm .u { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+.prow .ex { grid-column: 1 / -1; font-size: 13px; color: var(--muted); max-width: 72ch; }
+.io { padding: 14px 16px; display: grid; gap: 8px; }
+.io textarea { font-family: var(--f-mono); font-size: 12px; min-height: 110px; resize: vertical; }
+.prose { padding: 16px 18px; display: grid; gap: 10px; max-width: 100%; align-content: start; }
+.prose p, .prose li { max-width: 74ch; font-size: 14.5px; }
+.prose ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.toast { font-size: 13px; color: var(--ok); min-height: 1.2em; }
+@media (prefers-reduced-motion: reduce) { .progress span { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="label">Ensayo de indentación · probeta cilíndrica seca · 100 mm/min</div>
+    <h1>Esponja bajo punzón</h1>
+    <p class="lede">Un punzón plano hunde el cilindro, se retira y la esponja se recupera con el tiempo. Cambia material, punzón y ambiente; los parámetros completos de cada material están abajo, explicados.</p>
+  </header>
+
+  <div class="bench">
+    <aside class="panel controls" aria-label="Controles del ensayo">
+      <div class="group">
+        <div class="field">
+          <label class="label" for="preset">Material</label>
+          <select id="preset"></select>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="nuR">Poisson ν</label><output id="nuOut" for="nuR"></output></div>
+          <input id="nuR" type="range" min="0" max="0.2" step="0.01" value="0.1">
+          <p class="hint">Cuánto se ensancha de lado al aplastarla. Al comprimir a una fracción λ de su alto, el ancho crece a λ<sup>−ν</sup>. Máximo 0,2: más arriba la espuma se vuelve inestable.</p>
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">Cilindro</div>
+        <div class="pair">
+          <div class="field"><label class="hint" for="cylR">Radio (cm)</label><input id="cylR" type="number" min="0.5" max="10" step="0.1" value="2.5"></div>
+          <div class="field"><label class="hint" for="cylH">Altura (cm)</label><input id="cylH" type="number" min="0.5" max="20" step="0.1" value="5"></div>
+        </div>
+        <div class="field">
+          <span class="hint">Base</span>
+          <div class="seg" role="group" aria-label="Condición de la base">
+            <button id="baseGlued" type="button" aria-pressed="true">Pegada</button>
+            <button id="baseFree" type="button" aria-pressed="false">Apoyada</button>
+          </div>
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">Punzón</div>
+        <div class="field">
+          <div class="field-row"><label for="punchA">Radio</label><output id="punchAOut" for="punchA"></output></div>
+          <input id="punchA" type="range" min="0.2" max="3" step="0.05" value="1">
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="depth">Hundimiento</label><output id="depthOut" for="depth"></output></div>
+          <input id="depth" type="range" min="5" max="80" step="1" value="40">
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">Ambiente</div>
+        <div class="field">
+          <div class="field-row"><label for="temp">Temperatura</label><output id="tempOut" for="temp"></output></div>
+          <input id="temp" type="range" min="-20" max="80" step="1" value="23">
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="rh">Humedad relativa</label><output id="rhOut" for="rh"></output></div>
+          <input id="rh" type="range" min="0" max="99" step="1" value="50">
+        </div>
+      </div>
+      <div class="group">
+        <button id="run" class="btn" type="button">Simular</button>
+        <p class="hint" id="runHint">Se vuelve a simular al soltar cualquier control.</p>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="Resultados">
+      <div class="panel viz">
+        <div class="viz-grid">
+          <div class="viz-main">
+            <div class="viz-head">
+              <h2>Corte del cilindro</h2>
+              <span class="phase" id="phaseLbl">—</span>
+            </div>
+            <p class="hint">Toca la esponja para elegir la zona cuyos poros quieres ver.</p>
+            <div class="canvas-box" id="cbox"><canvas id="cv" tabindex="0" aria-label="Corte axisimétrico de la esponja deformada. Toca o usa las flechas para mover la zona de poros."></canvas><div class="progress"><span id="prog"></span></div></div>
+          </div>
+          <div class="micro">
+            <div class="viz-head">
+              <h2>Poros de la zona</h2>
+              <span class="phase" id="microPos">—</span>
+            </div>
+            <p class="hint">Cada esfera hueca vista en corte. Toca un poro para ver su estado.</p>
+            <div class="micro-box" id="mbox"><canvas id="mcv" aria-label="Vista ampliada de los poros de la zona elegida"></canvas></div>
+            <div class="field">
+              <div class="field-row"><label for="zoneN">Poros por lado</label><output id="zoneNOut" for="zoneN"></output></div>
+              <input id="zoneN" type="range" min="5" max="24" step="1" value="10">
+            </div>
+            <div class="mread" id="microRead"></div>
+            <p class="hint" id="poreInfo"></p>
+          </div>
+        </div>
+        <div class="play">
+          <button id="playBtn" type="button">Pausa</button>
+          <input id="scrub" type="range" min="0" max="0" step="1" value="0" aria-label="Instante de la animación">
+          <span class="num hint" id="tLbl">t = 0 s</span>
+        </div>
+        <div class="legend">
+          <span>Compresión local</span>
+          <div id="legTicks"></div>
+          <span id="legText"></span>
+        </div>
+      </div>
+
+      <div class="stats" id="stats"><div class="stat"><span class="label">Fuerza máxima</span><span class="v">…</span><span class="s">calculando</span></div><div class="stat"><span class="label">Energía disipada</span><span class="v">…</span><span class="s">calculando</span></div><div class="stat"><span class="label">Hundida al retirar</span><span class="v">…</span><span class="s">calculando</span></div><div class="stat"><span class="label">Al final</span><span class="v">…</span><span class="s">calculando</span></div></div>
+
+      <div class="charts">
+        <div class="panel chart">
+          <h3>Fuerza y hundimiento</h3>
+          <svg id="ch1" viewBox="0 0 420 250" role="img" aria-label="Fuerza en función del hundimiento"></svg>
+          <div class="key"><span><i style="background:var(--load)"></i>Carga</span><span><i style="background:var(--unload)"></i>Descarga</span><span>El área entre curvas es la energía disipada</span></div>
+        </div>
+        <div class="panel chart">
+          <h3>Recuperación de la altura</h3>
+          <svg id="ch2" viewBox="0 0 420 250" role="img" aria-label="Altura del centro superior en el tiempo"></svg>
+          <div class="key"><span><i style="background:var(--ink)"></i>Centro de la cara superior, % de la altura</span><span>Tiempo en escala logarítmica</span></div>
+        </div>
+      </div>
+
+      <div class="panel props">
+        <div class="viz-head"><h3>Propiedades efectivas a esta temperatura y humedad</h3><span class="hint">Derivadas de la ficha del material</span></div>
+        <div class="prop-grid" id="propGrid"></div>
+        <div class="chips" id="chips"></div>
+        <div class="notes" id="notes"></div>
+      </div>
+    </section>
+  </div>
+
+
+  <section class="panel b3" aria-labelledby="b3h">
+    <div class="b3-head">
+      <div>
+        <div class="label">Interactivo · mismo material y ambiente</div>
+        <h2 id="b3h">Esponja en 3D</h2>
+      </div>
+      <span class="phase num" id="b3time">—</span>
+    </div>
+    <div class="b3-grid">
+      <div class="b3-view">
+        <div class="b3-box" id="b3box"><canvas id="b3cv" tabindex="0" aria-label="Vista 3D de la esponja y el punzón. Arrastra el punzón para moverlo, el fondo para girar la cámara; flechas mueven el punzón, + y − lo suben y bajan."></canvas>
+          <div class="b3-alert" id="b3alert" role="alert" hidden><strong id="b3alertH">Ruptura detectada</strong><span id="b3alertTxt"></span><button type="button" id="b3alertReset">Reiniciar esponja</button></div>
+          <p class="b3-tip" id="b3tip">Arrastra el punzón para moverlo · arrastra el fondo para girar · rueda o pellizco para acercar</p>
+        </div>
+        <div class="stats b3-stats" id="b3stats"></div>
+      </div>
+      <div class="b3-ctl">
+        <div class="group">
+          <div class="label">Punzón</div>
+          <div class="field">
+            <div class="field-row"><label for="b3z">Altura de la cara</label><output id="b3zOut" for="b3z"></output></div>
+            <input id="b3z" type="range" min="0" max="65" step="0.5" value="60">
+          </div>
+          <div class="field">
+            <div class="field-row"><label for="b3x">Posición X</label><output id="b3xOut" for="b3x"></output></div>
+            <input id="b3x" type="range" min="-45" max="45" step="0.5" value="0">
+          </div>
+          <div class="field">
+            <div class="field-row"><label for="b3y">Posición Y</label><output id="b3yOut" for="b3y"></output></div>
+            <input id="b3y" type="range" min="-45" max="45" step="0.5" value="0">
+          </div>
+          <div class="pair">
+            <button class="btn ghost" id="b3up" type="button">Subir</button>
+            <button class="btn ghost" id="b3center" type="button">Centrar</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label">Esponja</div>
+          <div class="seg" role="group" aria-label="Base en 3D">
+            <button id="b3free" type="button" aria-pressed="true">Suelta en el suelo</button>
+            <button id="b3glued" type="button" aria-pressed="false">Pegada</button>
+          </div>
+          <div class="field">
+            <div class="field-row"><label for="b3muF">Roce con el suelo</label><output id="b3muFOut" for="b3muF"></output></div>
+            <input id="b3muF" type="range" min="0" max="1.2" step="0.05" value="0.6">
+          </div>
+          <div class="field">
+            <div class="field-row"><label for="b3muP">Roce con el punzón</label><output id="b3muPOut" for="b3muP"></output></div>
+            <input id="b3muP" type="range" min="0" max="1.2" step="0.05" value="0.8">
+          </div>
+          <div class="pair">
+            <button class="btn" id="b3reset" type="button">Reiniciar esponja</button>
+            <button class="btn ghost" id="b3pause" type="button">Pausa</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label">Malla</div>
+          <div class="seg" role="group" aria-label="Detalle de la malla 3D">
+            <button id="b3light" type="button" aria-pressed="true">Liviana · fluida</button>
+            <button id="b3fine" type="button" aria-pressed="false">Fina · más lenta</button>
+          </div>
+        </div>
+        <p class="hint">Dinámica explícita con la misma ley de material, en una malla más gruesa que el corte 2D: las fuerzas son orientativas (en la prueba centrada salen hasta ~15 % más altas). El tiempo es simulado; si el equipo no alcanza, avanza más lento que el real.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="below" aria-labelledby="fichaH">
+    <div class="below-head">
+      <div>
+        <div class="label">Para estimar otro material</div>
+        <h2 id="fichaH">Ficha del material</h2>
+      </div>
+      <div class="tools">
+        <button class="btn ghost" id="resetBtn" type="button">Restaurar material</button>
+        <button class="btn ghost" id="copyBtn" type="button">Copiar ficha</button>
+      </div>
+    </div>
+    <p class="lede">Cada valor cambia la simulación. Al editar uno, el material pasa a llamarse “Personalizado” y queda guardado en este navegador. Las cifras de los materiales incluidos son estimaciones de literatura; si tienes un ensayo real, ajusta primero C₁ y C₂.</p>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="pgroups" id="pgroups"></div>
+    <div class="panel io">
+      <h3>Cargar una ficha</h3>
+      <p class="hint">Pega aquí una ficha copiada antes (formato JSON) y pulsa Cargar.</p>
+      <textarea id="fichaIn" aria-label="Ficha en formato JSON" spellcheck="false"></textarea>
+      <div><button class="btn ghost" id="loadBtn" type="button">Cargar</button></div>
+    </div>
+
+    <div class="two">
+      <div class="panel prose">
+        <h3>Qué calcula</h3>
+        <p>Elementos finitos axisimétricos con grandes deformaciones. El cilindro se divide en una malla radial y vertical, más fina bajo el borde del punzón, donde se concentra el esfuerzo. El punzón es plano y rígido; su cara es rugosa, así que la esponja no se desliza sobre él mientras están en contacto. Baja a velocidad fija de 100 mm/min, la del ensayo de compresión de espumas ISO 3386.</p>
+        <p>La curva de la espuma tiene las tres zonas de Gibson y Ashby: elástica, meseta por pandeo de celdas y densificación. Sobre ella actúan dos mecanismos de pérdida de energía: el efecto Mullins (ablandamiento al descargar) y dos ramas viscoelásticas que explican la recuperación lenta.</p>
+        <p>La vista de poros amplía la zona elegida. Cada poro es una esfera hueca vista en corte, con paredes cuyo grosor sale de la densidad de la espuma. Su forma sigue la deformación local que calcula el modelo en ese punto exacto, así que poros cercanos al borde del punzón se deforman distinto que los del centro. Cada poro tiene además su propio umbral de pandeo (±40 % alrededor del promedio), como en una espuma real donde las celdas no son idénticas: por eso unos colapsan antes que otros.</p>
+        <p>El coeficiente de Poisson actúa en toda la compresión (hiperespuma de Storåkers): comprimir a una fracción λ del alto ensancha a λ<sup>−ν</sup>, y la curva de carga se mantiene igual a la de Gibson y Ashby. Sobre 0,2 la espuma se vuelve inestable: con una meseta plana, mantener el ensanche lateral exige más energía de la que las celdas pandeadas pueden dar. Por eso las espumas reales casi no se ensanchan al aplastarse.</p>
+        <p>La vista 3D usa dinámica explícita: el cilindro se divide en unos 1 300 tetraedros (2 300 en la malla fina) con la misma ley de material, apoyados en un suelo con roce. El punzón es un cilindro rígido que se puede mover en cualquier dirección; si empuja de lado o arrastra la cara superior, la esponja se desliza o se inclina. La masa se escala para que la respuesta sea casi estática a la velocidad de la mano.</p>
+        <p>La humedad que entra aquí es agua absorbida dentro del material sólido, en equilibrio con el aire. No es agua líquida en los poros. Esa agua baja la temperatura de transición vítrea del sólido y lo ablanda, por eso una esponja de celulosa seca es dura y húmeda es blanda.</p>
+        <p>El modelo se verificó contra la compresión uniforme exacta (error menor a 0,01 %) y contra la solución de Boussinesq para punzón plano en régimen lineal (converge al refinar la malla).</p>
+      </div>
+      <div class="panel prose">
+        <h3>Pendiente para más adelante</h3>
+        <ul>
+          <li>Velocidad del punzón como control. Hoy está fija en 100 mm/min; el modelo viscoelástico ya responde a la velocidad, sólo falta exponerla.</li>
+          <li>Agua líquida en los poros (poroelasticidad), para esponjas mojadas que gotean al apretar.</li>
+          <li>Colapso plástico y rotura de celdas, para sólidos vítreos que no recuperan su forma.</li>
+          <li>Fracción viscosa que crece cerca de Tg, en lugar de ser constante.</li>
+          <li>Ajuste automático de la ficha a partir de una curva de ensayo real.</li>
+          <li>Otras geometrías además del cilindro, y punzón esférico.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>(function (G) {
+  const PRESETS = {
+    pu: {
+      name: 'Poliuretano flexible (colchón, 30 kg/m³)',
+      Er: 60, Eg: 2000, Tg0: -45, wTg: 10, rhoS: 1200, rhoF: 30,
+      C1: 1, C2: 0.05, ysRatio: 0.033, nu: 0.1, hard: 0.2, epsL: 0, epsOn: 0,
+      poreD: 0.6, theta: 75,
+      gabMm: 0.008, gabC: 5, gabK: 0.8, gtK: 0.3, betaH: 0.05, alphaT: 1.5e-4,
+      g1: 0.3, tau1: 0.5, g2: 0.2, tau2: 20, wlfC1: 6, wlfC2: 120, Ea: 120,
+      mullR: 3, mullM: 0.3, lamB: 2.2
+    },
+    memoria: {
+      name: 'Espuma viscoelástica (memoria, 50 kg/m³)',
+      Er: 2, Eg: 100, Tg0: 15, wTg: 12, rhoS: 1200, rhoF: 50,
+      C1: 1, C2: 0.05, ysRatio: 0.033, nu: 0.05, hard: 0.25, epsL: 0, epsOn: 0,
+      poreD: 0.4, theta: 70,
+      gabMm: 0.01, gabC: 5, gabK: 0.8, gtK: 0.3, betaH: 0.05, alphaT: 1.5e-4,
+      g1: 1.0, tau1: 1, g2: 1.5, tau2: 15, wlfC1: 10, wlfC2: 60, Ea: 120,
+      mullR: 3, mullM: 0.3, lamB: 2.0
+    },
+    celulosa: {
+      name: 'Celulosa regenerada (esponja de cocina, 40 kg/m³)',
+      Er: 400, Eg: 6000, Tg0: 220, wTg: 20, rhoS: 1500, rhoF: 40,
+      C1: 1, C2: 0.05, ysRatio: 0.033, nu: 0.15, hard: 0.2, epsL: 0, epsOn: 0,
+      poreD: 1.5, theta: 25,
+      gabMm: 0.06, gabC: 10, gabK: 0.75, gtK: 6, betaH: 0.25, alphaT: 1e-5,
+      g1: 0.2, tau1: 1, g2: 0.15, tau2: 30, wlfC1: 10, wlfC2: 80, Ea: 150,
+      mullR: 2.5, mullM: 0.3, lamB: 1.5
+    },
+    melamina: {
+      name: 'Melamina (esponja "mágica", 9 kg/m³)',
+      Er: 9000, Eg: 9000, Tg0: 250, wTg: 15, rhoS: 1570, rhoF: 9,
+      C1: 1, C2: 0.05, ysRatio: 0.02, nu: 0.1, hard: 0.15, epsL: 0, epsOn: 0,
+      poreD: 0.12, theta: 40,
+      gabMm: 0.01, gabC: 8, gabK: 0.8, gtK: 0.5, betaH: 0.02, alphaT: 3e-5,
+      g1: 0.15, tau1: 0.5, g2: 0.1, tau2: 20, wlfC1: 10, wlfC2: 80, Ea: 200,
+      mullR: 2, mullM: 0.2, lamB: 1.5
+    }
+  };
+  G.SPONGE_PRESETS = PRESETS;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script id="src-engine">/* Motor de simulación de esponja cilíndrica bajo punzón plano.
+   Elementos finitos axisimétricos, Lagrangiano total, Q4 2x2.
+   Material: hiperespuma de estiramientos principales con curva Gibson–Ashby
+   (elástico → meseta → densificación), acoplamiento volumétrico acotado (ν),
+   efecto Mullins (Ogden–Roxburgh) y viscoelasticidad de Prony (Simo).
+   Temperatura y humedad: isoterma GAB → humedad del sólido → Tg (Gordon–Taylor)
+   → módulo del sólido (transición vítrea) y tiempos de relajación (WLF/Arrhenius).
+   Unidades internas: m, Pa, s, N. */
+(function (G) {
+  'use strict';
+  const TG_WATER = -135;      // Tg del agua, °C
+  const RGAS = 8.314;
+  const T_REF = 23, RH_REF = 50;
+  const SPEED = 100 / 60 / 1000; // 100 mm/min (ISO 3386) en m/s
+  const GAMMA_W = 0.072, RHO_W = 998, GRAV = 9.81;
+
+  /* ---------- utilidades ---------- */
+  function erf(x) {
+    const s = x < 0 ? -1 : 1; x = Math.abs(x);
+    const t = 1 / (1 + 0.3275911 * x);
+    const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+    return s * y;
+  }
+  function lncosh(x) { const a = Math.abs(x); return a + Math.log1p(Math.exp(-2 * a)) - Math.LN2; }
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  /* ---------- ambiente → propiedades efectivas ---------- */
+  function moisture(p, RH) {
+    const a = clamp(RH / 100, 0, 0.995), Ka = p.gabK * a;
+    return p.gabMm * p.gabC * Ka / ((1 - Ka) * (1 - Ka + p.gabC * Ka));
+  }
+  function glassTemp(p, M) {
+    const ww = M / (1 + M), wp = 1 - ww;
+    return (wp * p.Tg0 + p.gtK * ww * TG_WATER) / (wp + p.gtK * ww);
+  }
+  function logShiftFromTg(p, T, Tg) {
+    if (T >= Tg) return -p.wlfC1 * (T - Tg) / (p.wlfC2 + T - Tg);
+    return (p.Ea * 1000 / (RGAS * Math.LN10)) * (1 / (T + 273.15) - 1 / (Tg + 273.15));
+  }
+  function solidModulus(p, T, Tg) {
+    const Er = p.Er * 1e6 * (T + 273.15) / (T_REF + 273.15);
+    const Eg = Math.max(p.Eg * 1e6, Er);
+    const gf = 0.5 * (1 - Math.tanh((T - Tg) / p.wTg));
+    return { Es: Math.pow(10, Math.log10(Er) + (Math.log10(Eg) - Math.log10(Er)) * gf), gf };
+  }
+
+  function derive(p, T, RH) {
+    const M = moisture(p, RH), Mref = moisture(p, RH_REF);
+    const Tg = glassTemp(p, M), TgRef = glassTemp(p, Mref);
+    const { Es, gf } = solidModulus(p, T, Tg);
+    const phi = p.rhoF / p.rhoS;
+    const E = p.C1 * Es * phi * phi;
+    const sigEl = p.C2 * Es * phi * phi;
+    const sigYs = Es * p.ysRatio;
+    const sigPlast = gf > 1e-4 ? 0.3 * sigYs * Math.pow(phi, 1.5) / gf : Infinity;
+    const sigPl = Math.min(sigEl, sigPlast);
+    const epsL = (p.epsL > 0 && p.epsL < 1) ? p.epsL : Math.max(0.3, 1 - 1.4 * phi);
+    const epsOn = (p.epsOn > 0 && p.epsOn < epsL) ? p.epsOn : Math.max(0.2, epsL - 0.30);
+    let logA = logShiftFromTg(p, T, Tg) - logShiftFromTg(p, T_REF, TgRef);
+    logA = clamp(logA, -6, 6);
+    const shift = Math.pow(10, logA);
+    const scale = 1 + p.alphaT * (T - T_REF) + p.betaH * (M - Mref);
+    const r = p.poreD / 2000; // radio de poro en m
+    const hCap = Math.max(0, 2 * GAMMA_W * Math.cos(p.theta * Math.PI / 180) / (RHO_W * GRAV * r));
+    return {
+      T, RH, M, Mref, Tg, Es, gf, phi, E, sigEl, sigPlast, sigPl, plastic: sigPlast < sigEl,
+      epsL, epsOn, epsY: sigPl / E, nu: p.nu, hard: p.hard,
+      g1: p.g1, g2: p.g2, tau1: p.tau1 * shift, tau2: p.tau2 * shift, shift, logA,
+      mullR: p.mullR, mullM: p.mullM, scale, hCap,
+      lamBreak: 1 + Math.max(0.02, (p.lamB || 2) - 1) * (1 - 0.7 * gf)
+    };
+  }
+
+  /* ---------- ley constitutiva ----------
+     Hiperespuma de estiramientos principales con Poisson constante (tipo Storåkers):
+       τ_i = T(ln λ_i) − T(−β ln J),  β = ν/(1−2ν)
+     En compresión uniaxial libre esto da exactamente λ_lateral = λ^(−ν) y la tensión
+     nominal axial igual a la curva objetivo P(λ) de Gibson–Ashby. T se construye
+     como la serie T(e) = Σ_k λ_k P(λ_k), con ln λ_k = (−ν)^k e, y se tabula. */
+  function makeLaw(m) {
+    const nu = clamp(m.nu, 0, 0.2);
+    const beta = nu / (1 - 2 * nu);
+    const E = m.E, sig = m.sigPl;
+    const hs = m.hard * sig / 0.5;                  // pendiente de meseta
+    const epsL = m.epsL, uOn = m.epsOn / epsL, n = 3;
+    const A = sig * (1 - uOn) / Math.pow(uOn, n);
+    const uc = 0.985;
+    const Dfun = u => A * u * u * u / (1 - u);
+    const dDfun = u => A * (3 * u * u / (1 - u) + u * u * u / ((1 - u) * (1 - u)));
+    const Dc = Dfun(uc), dDc = dDfun(uc);
+    // curva nominal objetivo (tracción +, compresión −)
+    function P(lam) {
+      if (lam >= 1) { const y = lam - 1; return E * y * (1 + y); }
+      const x = 1 - lam, u = x / epsL;
+      const D = u <= uc ? Dfun(u) : Dc + dDc * (u - uc);
+      return -(sig * Math.tanh(E * x / sig) + hs * x + D);
+    }
+    // tabla de T(e) y Φ(e) = ∫0^e T
+    const h = 0.0015, n0 = Math.ceil(5.8 / h), n1 = Math.ceil(1.4 / h), N = n0 + n1 + 1;
+    const eMin = -n0 * h;
+    const Tt = new Float64Array(N), Mt = new Float64Array(N), Ft = new Float64Array(N);
+    for (let i = 0; i < N; i++) {
+      let e = eMin + i * h, sum = 0;
+      for (let k = 0; k < 60; k++) {
+        const lam = Math.exp(e);
+        sum += lam * P(lam);
+        if (nu === 0) break;
+        e *= -nu;
+        if (Math.abs(e) < 1e-14) break;
+      }
+      Tt[i] = sum;
+    }
+    for (let i = 0; i < N; i++) Mt[i] = i === 0 ? (Tt[1] - Tt[0]) / h : i === N - 1 ? (Tt[N - 1] - Tt[N - 2]) / h : (Tt[i + 1] - Tt[i - 1]) / (2 * h);
+    // integral exacta de la cúbica de Hermite por tramo, con Φ(0) = 0
+    Ft[n0] = 0;
+    for (let i = n0; i < N - 1; i++) Ft[i + 1] = Ft[i] + h * (Tt[i] + Tt[i + 1]) / 2 + h * h * (Mt[i] - Mt[i + 1]) / 12;
+    for (let i = n0; i > 0; i--) Ft[i - 1] = Ft[i] - (h * (Tt[i - 1] + Tt[i]) / 2 + h * h * (Mt[i - 1] - Mt[i]) / 12);
+    const eMax = eMin + (N - 1) * h;
+    function Tof(e) {
+      if (e <= eMin) return Tt[0] + Mt[0] * (e - eMin);
+      if (e >= eMax) return Tt[N - 1] + Mt[N - 1] * (e - eMax);
+      const x = (e - eMin) / h; let i = x | 0; if (i > N - 2) i = N - 2;
+      const t = x - i, t2 = t * t, t3 = t2 * t;
+      return (2 * t3 - 3 * t2 + 1) * Tt[i] + (t3 - 2 * t2 + t) * h * Mt[i] + (-2 * t3 + 3 * t2) * Tt[i + 1] + (t3 - t2) * h * Mt[i + 1];
+    }
+    function Phi(e) {
+      if (e <= eMin) { const d = e - eMin; return Ft[0] + Tt[0] * d + 0.5 * Mt[0] * d * d; }
+      if (e >= eMax) { const d = e - eMax; return Ft[N - 1] + Tt[N - 1] * d + 0.5 * Mt[N - 1] * d * d; }
+      const x = (e - eMin) / h; let i = x | 0; if (i > N - 2) i = N - 2;
+      const t = x - i, t2 = t * t, t3 = t2 * t, t4 = t3 * t;
+      // ∫0^t de las bases de Hermite
+      return Ft[i] + h * ((t4 / 2 - t3 + t) * Tt[i] + (t4 / 4 - 2 * t3 / 3 + t2 / 2) * h * Mt[i] + (-t4 / 2 + t3) * Tt[i + 1] + (t4 / 4 - t3 / 3) * h * Mt[i + 1]);
+    }
+    function dT(e) { // pendiente dT/de (rigidez tangente en escala logarítmica)
+      if (e <= eMin) return Mt[0];
+      if (e >= eMax) return Mt[N - 1];
+      const x = (e - eMin) / h; let i = x | 0; if (i > N - 2) i = N - 2;
+      const t = x - i, t2 = t * t;
+      return ((6 * t2 - 6 * t) * Tt[i] + (-6 * t2 + 6 * t) * Tt[i + 1]) / h + (3 * t2 - 4 * t + 1) * Mt[i] + (3 * t2 - 2 * t) * Mt[i + 1];
+    }
+    return { P, Tof, dT, Phi, nu, beta, wref: sig * 0.3, E, sig };
+  }
+
+  // Tensión base S (2º Piola–Kirchhoff) desde C (componentes rr, zz, rz, θθ)
+  function baseStress(law, c11, c22, c12, c33, out) {
+    const mean = 0.5 * (c11 + c22), dd = 0.5 * (c11 - c22);
+    const d = Math.sqrt(dd * dd + c12 * c12);
+    const e1 = mean + d, e2 = mean - d;
+    if (!(e2 > 1e-6) || !(c33 > 1e-6)) return false;
+    let vx, vy;
+    if (d < 1e-12) { vx = 1; vy = 0; }
+    else {
+      const ax = c12, ay = e1 - c11, bx = e1 - c22, by = c12;
+      if (ax * ax + ay * ay > bx * bx + by * by) { vx = ax; vy = ay; } else { vx = bx; vy = by; }
+      const nn = Math.hypot(vx, vy); vx /= nn; vy /= nn;
+    }
+    const g1 = 0.5 * Math.log(e1), g2 = 0.5 * Math.log(e2), g3 = 0.5 * Math.log(c33);
+    const lnJ = g1 + g2 + g3, eb = -law.beta * lnJ;
+    const Tb = law.beta > 0 ? law.Tof(eb) : 0;
+    const s1 = (law.Tof(g1) - Tb) / e1, s2 = (law.Tof(g2) - Tb) / e2, s3 = (law.Tof(g3) - Tb) / c33;
+    const ux = -vy, uy = vx;
+    out[0] = s1 * vx * vx + s2 * ux * ux;   // S_rr
+    out[1] = s1 * vy * vy + s2 * uy * uy;   // S_zz
+    out[2] = s3;                              // S_θθ
+    out[3] = s1 * vx * vy + s2 * ux * uy;   // S_rz
+    out[4] = law.Phi(g1) + law.Phi(g2) + law.Phi(g3) + (law.beta > 1e-9 ? law.Phi(eb) / law.beta : 0); // energía
+    out[5] = Math.exp(Math.min(g1, g2, g3)); // estiramiento mínimo
+    out[6] = Math.exp(Math.max(g1, g2, g3)); // estiramiento máximo
+    return true;
+  }
+
+  /* ---------- material completo en un punto de Gauss ---------- */
+  // historia por PG: Q1[4], Q2[4], S0prev[4], Wm  → 13
+  const HL = 13;
+  function makeMaterialPoint(m) {
+    const law = makeLaw(m);
+    const tmp = new Float64Array(7);
+    const r = m.mullR, mm = m.mullM * law.wref, beta = 0.1;
+    let cdt = -1, ce1 = 1, cf1 = 1, ce2 = 1, cf2 = 1;
+    // S total en out[0..3]; historia nueva en hOut (si se pasa)
+    function stress(c11, c22, c12, c33, h, ho, dt, out, hOut) {
+      if (!baseStress(law, c11, c22, c12, c33, tmp)) return false;
+      const W = tmp[4];
+      const Wm = Math.max(h[ho + 12], W);
+      let eta = 1;
+      if (r > 1) eta = 1 - (1 / r) * erf((Wm - W) / (mm + beta * Wm));
+      if (dt !== cdt) {
+        cdt = dt;
+        ce1 = Math.exp(-dt / m.tau1); cf1 = dt / m.tau1 > 1e-9 ? m.tau1 / dt * (1 - ce1) : 1;
+        ce2 = Math.exp(-dt / m.tau2); cf2 = dt / m.tau2 > 1e-9 ? m.tau2 / dt * (1 - ce2) : 1;
+      }
+      const e1 = ce1, f1 = cf1, e2 = ce2, f2 = cf2;
+      for (let k = 0; k < 4; k++) {
+        const dS = tmp[k] - h[ho + 8 + k];
+        const q1 = e1 * h[ho + k] + m.g1 * f1 * dS;
+        const q2 = e2 * h[ho + 4 + k] + m.g2 * f2 * dS;
+        out[k] = eta * tmp[k] + q1 + q2;
+        if (hOut) { hOut[ho + k] = q1; hOut[ho + 4 + k] = q2; hOut[ho + 8 + k] = tmp[k]; }
+      }
+      if (hOut) hOut[ho + 12] = Wm;
+      out[4] = tmp[5]; out[5] = tmp[6];
+      return true;
+    }
+    return { law, stress };
+  }
+
+  /* ---------- prueba de punto material: compresión uniaxial con lateral libre ---------- */
+  function uniaxialCurve(m, strains) {
+    const law = makeLaw(m), o = new Float64Array(6);
+    let lat = 1;
+    const res = [];
+    for (const eps of strains) {
+      const l = 1 - eps;
+      // resolver estiramiento lateral con S_rr = 0 (λ_r = λ_θ = lat)
+      for (let it = 0; it < 60; it++) {
+        baseStress(law, lat * lat, l * l, 0, lat * lat, o);
+        const f = o[0], h = 1e-7;
+        baseStress(law, (lat + h) * (lat + h), l * l, 0, (lat + h) * (lat + h), o);
+        const df = (o[0] - f) / h;
+        const step = f / df;
+        lat -= step;
+        if (Math.abs(step) < 1e-12) break;
+      }
+      baseStress(law, lat * lat, l * l, 0, lat * lat, o);
+      // nominal: P_zz = λ_z S_zz ; fuerza/área original
+      res.push({ eps, P: -l * o[1], lat, target: -law.P(l) });
+    }
+    return res;
+  }
+
+  /* ---------- malla ---------- */
+  function geomSeq(x0, x1, n, ratio) {
+    // n elementos de x0 a x1, tamaño multiplicado por ratio en cada paso
+    const out = [x0];
+    let sum = 0, w = 1; const ws = [];
+    for (let i = 0; i < n; i++) { ws.push(w); sum += w; w *= ratio; }
+    let acc = x0;
+    for (let i = 0; i < n; i++) { acc += (x1 - x0) * ws[i] / sum; out.push(acc); }
+    out[n] = x1;
+    return out;
+  }
+
+  function buildMesh(R, H, a, nr, nz) {
+    let rs;
+    const full = a >= R * 0.98;
+    if (full) rs = geomSeq(0, R, nr, 1);
+    else {
+      let n1 = clamp(Math.round(nr * Math.sqrt(a / R)), 3, nr - 3);
+      const n2 = nr - n1;
+      const q1 = Math.max(0.87, Math.pow(0.25, 1 / n1)), q2 = Math.min(1 / 0.87, Math.pow(1 / 0.15, 1 / n2));
+      const r1 = geomSeq(0, a, n1, q1), r2 = geomSeq(a, R, n2, q2);
+      rs = r1.concat(r2.slice(1));
+    }
+    const zs = geomSeq(0, H, nz, Math.max(0.9, Math.pow(0.25, 1 / nz)));
+    const nnr = rs.length, nnz = zs.length;
+    const X = new Float64Array(nnr * nnz * 2);
+    for (let j = 0; j < nnz; j++) for (let i = 0; i < nnr; i++) {
+      const n = j * nnr + i; X[2 * n] = rs[i]; X[2 * n + 1] = zs[j];
+    }
+    const ne = (nnr - 1) * (nnz - 1);
+    const conn = new Int32Array(ne * 4);
+    let e = 0;
+    for (let j = 0; j < nnz - 1; j++) for (let i = 0; i < nnr - 1; i++) {
+      const n0 = j * nnr + i;
+      conn[4 * e] = n0; conn[4 * e + 1] = n0 + 1; conn[4 * e + 2] = n0 + nnr + 1; conn[4 * e + 3] = n0 + nnr; e++;
+    }
+    return { rs, zs, nnr, nnz, nn: nnr * nnz, ne, X, conn, full, a: full ? Infinity : a, R, H };
+  }
+
+  /* ---------- solver en banda (LU sin pivoteo) ---------- */
+  function bandLU(A, n, bw) {
+    const W = 2 * bw + 1;
+    for (let k = 0; k < n; k++) {
+      const piv = A[k * W + bw];
+      if (!(Math.abs(piv) > 1e-300)) return false;
+      const iMax = Math.min(n - 1, k + bw);
+      for (let i = k + 1; i <= iMax; i++) {
+        const ik = i * W + (k - i + bw);
+        const l = A[ik] / piv;
+        if (l === 0) continue;
+        A[ik] = l;
+        const base = i * W - i + bw, kb = k * W - k + bw;
+        for (let j = k + 1; j <= iMax; j++) A[base + j] -= l * A[kb + j];
+      }
+    }
+    return true;
+  }
+  function bandSolve(A, n, bw, b) {
+    const W = 2 * bw + 1;
+    for (let i = 0; i < n; i++) {
+      let s = b[i]; const j0 = Math.max(0, i - bw);
+      for (let j = j0; j < i; j++) s -= A[i * W + (j - i + bw)] * b[j];
+      b[i] = s;
+    }
+    for (let i = n - 1; i >= 0; i--) {
+      let s = b[i]; const j1 = Math.min(n - 1, i + bw);
+      for (let j = i + 1; j <= j1; j++) s -= A[i * W + (j - i + bw)] * b[j];
+      b[i] = s / A[i * W + bw];
+    }
+  }
+
+  /* ---------- simulación ---------- */
+  const PH = 1e-6; // E11,E22,E33,2E12 → (dc11,dc22,dc12,dc33)
+  const PERT = [[2 * PH, 0, 0, 0], [0, 2 * PH, 0, 0], [0, 0, 0, 2 * PH], [0, 0, PH, 0]];
+  const GP = [-1 / Math.sqrt(3), 1 / Math.sqrt(3)];
+  const XI = [-1, 1, 1, -1], ETA = [-1, -1, 1, 1];
+
+  function createSim(cfg) {
+    const m = cfg.mat;
+    const H = cfg.H * m.scale, R = cfg.R * m.scale;
+    const a = Math.min(cfg.a, R * 1.5);
+    const mesh = buildMesh(R, H, a, cfg.nr || 16, cfg.nz || 20);
+    const mp = makeMaterialPoint(m);
+    const nd = mesh.nn * 2, nnr = mesh.nnr;
+    const bw = 2 * (nnr + 1) + 1;
+    const W = 2 * bw + 1;
+    const K = new Float64Array(nd * W), rhs = new Float64Array(nd), fint = new Float64Array(nd);
+    const u = new Float64Array(nd), uPrev = new Float64Array(nd), uTry = new Float64Array(nd);
+    const nGP = mesh.ne * 4;
+    const hist = new Float64Array(nGP * HL), histTr = new Float64Array(nGP * HL);
+    const lmaxE = new Float64Array(mesh.ne), lminE = new Float64Array(mesh.ne), pE = new Float64Array(mesh.ne), szE = new Float64Array(mesh.ne);
+
+    // geometría precomputada por PG
+    const gN = new Float64Array(nGP * 4), gR = new Float64Array(nGP * 4), gZ = new Float64Array(nGP * 4), gRad = new Float64Array(nGP), gW = new Float64Array(nGP);
+    for (let e = 0; e < mesh.ne; e++) {
+      const n0 = mesh.conn[4 * e], n2 = mesh.conn[4 * e + 2];
+      const r0 = mesh.X[2 * n0], z0 = mesh.X[2 * n0 + 1], r1 = mesh.X[2 * n2], z1 = mesh.X[2 * n2 + 1];
+      const hr = r1 - r0, hz = z1 - z0;
+      let g = 0;
+      for (const ey of GP) for (const ex of GP) {
+        const k = e * 4 + g;
+        for (let a2 = 0; a2 < 4; a2++) {
+          gN[k * 4 + a2] = 0.25 * (1 + XI[a2] * ex) * (1 + ETA[a2] * ey);
+          gR[k * 4 + a2] = 0.25 * XI[a2] * (1 + ETA[a2] * ey) * 2 / hr;
+          gZ[k * 4 + a2] = 0.25 * ETA[a2] * (1 + XI[a2] * ex) * 2 / hz;
+        }
+        gRad[k] = r0 + hr * (1 + ex) / 2;
+        gW[k] = gRad[k] * hr * hz / 4;
+        g++;
+      }
+    }
+
+    // condiciones de borde
+    const fixed = new Uint8Array(nd);
+    for (let j = 0; j < mesh.nnz; j++) fixed[2 * (j * nnr)] = 1; // eje: u_r = 0
+    for (let i = 0; i < nnr; i++) { fixed[2 * i + 1] = 1; if (cfg.base === 'glued') fixed[2 * i] = 1; }
+
+    // nodos de contacto (fila superior bajo el punzón)
+    const topRow = (mesh.nnz - 1) * nnr;
+    const hTop = H - mesh.zs[mesh.nnz - 2];
+    const cNodes = [], cArea = [];
+    for (let i = 0; i < nnr; i++) {
+      const r = mesh.rs[i];
+      if (r <= mesh.a * (1 + 1e-9)) {
+        let A = 0;
+        if (i > 0) { const ra = mesh.rs[i - 1], L = r - ra; A += L * (ra + 2 * r) / 6; }
+        if (i < nnr - 1 && mesh.rs[i + 1] <= mesh.a * (1 + 1e-9) + 1e-12) { const rb = mesh.rs[i + 1], L = rb - r; A += L * (2 * r + rb) / 6; }
+        else if (i < nnr - 1 && !mesh.full) { /* borde del punzón: sólo el tramo interior */ }
+        cNodes.push(topRow + i); cArea.push(A);
+      }
+    }
+    const Einst = m.E * (1 + m.g1 + m.g2);
+    const dCon = Math.max(1e-12, Math.min((cfg.dCon || 1e-3) * hTop, 0.002 * cfg.depthFrac * H));
+    const rough = cfg.rough !== false;
+    let stickOn = true;
+    const urRef = new Float64Array(cNodes.length);
+    function updateStick() {
+      // el ancla radial sigue al nodo mientras no está en contacto
+      for (let c = 0; c < cNodes.length; c++) {
+        const n = cNodes[c];
+        if (!stickOn || (H + u[2 * n + 1] - zpNow) / dCon < -20) urRef[c] = u[2 * n];
+      }
+    }
+    const kPen = cArea.map(A => 300 * Einst * Math.max(A, 1e-12) / hTop);
+
+    const Sg = new Float64Array(6), Sp = new Float64Array(6), D = new Float64Array(16);
+    const Sv = new Float64Array(4);
+    const ke = new Float64Array(64), fe = new Float64Array(8), B = new Float64Array(32);
+    let ok = true;
+
+    function assemble(uu, dt, zp, wantK) {
+      if (wantK) K.fill(0);
+      fint.fill(0);
+      fmaxE = 0;
+      for (let e = 0; e < mesh.ne; e++) {
+        const cn = mesh.conn;
+        ke.fill(0); fe.fill(0);
+        let lmin = 0, lmax = 0, pAcc = 0, szAcc = 0;
+        for (let g = 0; g < 4; g++) {
+          const k = e * 4 + g;
+          let urR = 0, urZ = 0, uzR = 0, uzZ = 0, ur = 0;
+          for (let a2 = 0; a2 < 4; a2++) {
+            const n = cn[4 * e + a2];
+            const vr = uu[2 * n], vz = uu[2 * n + 1];
+            urR += gR[k * 4 + a2] * vr; urZ += gZ[k * 4 + a2] * vr;
+            uzR += gR[k * 4 + a2] * vz; uzZ += gZ[k * 4 + a2] * vz;
+            ur += gN[k * 4 + a2] * vr;
+          }
+          const F11 = 1 + urR, F12 = urZ, F21 = uzR, F22 = 1 + uzZ, F33 = 1 + ur / gRad[k];
+          const c11 = F11 * F11 + F21 * F21, c22 = F12 * F12 + F22 * F22, c12 = F11 * F12 + F21 * F22, c33 = F33 * F33;
+          if (!mp.stress(c11, c22, c12, c33, hist, k * HL, dt, Sg, histTr)) return false;
+          lmin += Sg[4] / 4; if (Sg[5] > lmax) lmax = Sg[5];
+          { // tensión de Cauchy (para mostrar presión local)
+            const Jf = (F11 * F22 - F12 * F21) * F33;
+            const srr = (F11 * (F11 * Sg[0] + F12 * Sg[3]) + F12 * (F11 * Sg[3] + F12 * Sg[1])) / Jf;
+            const szz = (F21 * (F21 * Sg[0] + F22 * Sg[3]) + F22 * (F21 * Sg[3] + F22 * Sg[1])) / Jf;
+            const stt = F33 * F33 * Sg[2] / Jf;
+            pAcc += -(srr + szz + stt) / 12; szAcc += szz / 4;
+          }
+          const w = gW[k];
+          // B (4x8): filas E11,E22,E33,2E12
+          for (let a2 = 0; a2 < 4; a2++) {
+            const NR = gR[k * 4 + a2], NZ = gZ[k * 4 + a2], N = gN[k * 4 + a2] / gRad[k];
+            B[0 * 8 + 2 * a2] = F11 * NR; B[0 * 8 + 2 * a2 + 1] = F21 * NR;
+            B[1 * 8 + 2 * a2] = F12 * NZ; B[1 * 8 + 2 * a2 + 1] = F22 * NZ;
+            B[2 * 8 + 2 * a2] = F33 * N;  B[2 * 8 + 2 * a2 + 1] = 0;
+            B[3 * 8 + 2 * a2] = F11 * NZ + F12 * NR; B[3 * 8 + 2 * a2 + 1] = F21 * NZ + F22 * NR;
+          }
+          Sv[0] = Sg[0]; Sv[1] = Sg[1]; Sv[2] = Sg[2]; Sv[3] = Sg[3];
+          for (let i = 0; i < 8; i++) fe[i] += w * (B[i] * Sv[0] + B[8 + i] * Sv[1] + B[16 + i] * Sv[2] + B[24 + i] * Sv[3]);
+          if (wantK) {
+            // tangente numérica dS/dE (Voigt con 2E12)
+            const h = PH;
+            for (let j = 0; j < 4; j++) {
+              const pp = PERT[j];
+              if (!mp.stress(c11 + pp[0], c22 + pp[1], c12 + pp[2], c33 + pp[3], hist, k * HL, dt, Sp, null)) return false;
+              for (let i = 0; i < 4; i++) D[i * 4 + j] = (Sp[i] - Sv[i]) / h;
+            }
+            for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) { const s = 0.5 * (D[i * 4 + j] + D[j * 4 + i]); D[i * 4 + j] = s; D[j * 4 + i] = s; }
+            // DB (4x8)
+            for (let i = 0; i < 8; i++) {
+              const b0 = B[i], b1 = B[8 + i], b2 = B[16 + i], b3 = B[24 + i];
+              const d0 = D[0] * b0 + D[1] * b1 + D[2] * b2 + D[3] * b3;
+              const d1 = D[4] * b0 + D[5] * b1 + D[6] * b2 + D[7] * b3;
+              const d2 = D[8] * b0 + D[9] * b1 + D[10] * b2 + D[11] * b3;
+              const d3 = D[12] * b0 + D[13] * b1 + D[14] * b2 + D[15] * b3;
+              for (let j = 0; j < 8; j++) ke[j * 8 + i] += w * (B[j] * d0 + B[8 + j] * d1 + B[16 + j] * d2 + B[24 + j] * d3);
+            }
+            // rigidez geométrica
+            for (let a2 = 0; a2 < 4; a2++) for (let b2 = 0; b2 < 4; b2++) {
+              const Ra = gR[k * 4 + a2], Za = gZ[k * 4 + a2], Rb = gR[k * 4 + b2], Zb = gZ[k * 4 + b2];
+              const Gab = w * (Ra * (Sv[0] * Rb + Sv[3] * Zb) + Za * (Sv[3] * Rb + Sv[1] * Zb));
+              const hoop = w * Sv[2] * gN[k * 4 + a2] * gN[k * 4 + b2] / (gRad[k] * gRad[k]);
+              ke[(2 * a2) * 8 + 2 * b2] += Gab + hoop;
+              ke[(2 * a2 + 1) * 8 + 2 * b2 + 1] += Gab;
+            }
+          }
+        }
+        lminE[e] = lmin; lmaxE[e] = lmax; pE[e] = pAcc; szE[e] = szAcc;
+        for (let i = 0; i < 8; i++) { const av = Math.abs(fe[i]); if (av > fmaxE) fmaxE = av; }
+        for (let a2 = 0; a2 < 4; a2++) for (let i2 = 0; i2 < 2; i2++) {
+          const I = 2 * cn[4 * e + a2] + i2;
+          fint[I] += fe[2 * a2 + i2];
+          if (wantK) for (let b2 = 0; b2 < 4; b2++) for (let j2 = 0; j2 < 2; j2++) {
+            const J = 2 * cn[4 * e + b2] + j2;
+            K[I * W + (J - I + bw)] += ke[(2 * a2 + i2) * 8 + 2 * b2 + j2];
+          }
+        }
+      }
+      // contacto (penalización)
+      let force = 0;
+      for (let c = 0; c < cNodes.length; c++) {
+        const n = cNodes[c], dof = 2 * n + 1;
+        const pen = H + uu[dof] - zp;
+        // penalización suavizada (softplus): evita el parpadeo de nodos en el límite de contacto
+        const x = pen / dCon;
+        if (x > -30) {
+          const sp = x > 30 ? x : Math.log1p(Math.exp(x));
+          const sg = x > 30 ? 1 : 1 / (1 + Math.exp(-x));
+          const f = kPen[c] * dCon * sp;
+          fint[dof] += f; force += f;
+          if (wantK) K[dof * W + bw] += kPen[c] * sg;
+          if (rough) { // punzón rugoso: adherencia radial mientras hay contacto (se suelta al separarse)
+            const dr = 2 * n, dl = uu[dr] - urRef[c];
+            fint[dr] += kPen[c] * sg * dl;
+            if (wantK) {
+              K[dr * W + bw] += kPen[c] * sg;
+              K[dr * W + (dof - dr + bw)] += kPen[c] * sg * (1 - sg) / dCon * dl;
+            }
+          }
+        }
+      }
+      assemble.force = force * 2 * Math.PI;
+      return true;
+    }
+
+    const fref0 = Math.max(m.sigPl, 1) * R * R / 50;
+    let fmaxE = 0;
+    function resNorm() { let s = 0; for (let i = 0; i < nd; i++) if (!fixed[i]) s += fint[i] * fint[i]; return Math.sqrt(s); }
+    const uLs = new Float64Array(nd);
+    function newton(zp, dt, predFac) {
+      // predictor: extrapolación lineal del paso anterior
+      for (let i = 0; i < nd; i++) uTry[i] = u[i] + predFac * (u[i] - uPrev[i]);
+      if (!assemble(uTry, dt, zp, false)) for (let i = 0; i < nd; i++) uTry[i] = u[i];
+      for (let it = 0; it < 20; it++) {
+        if (!assemble(uTry, dt, zp, true)) return false;
+        let rn = 0;
+        for (let i = 0; i < nd; i++) { rhs[i] = fixed[i] ? 0 : -fint[i]; rn = Math.max(rn, Math.abs(rhs[i])); }
+        const r2 = resNorm();
+        const fref = Math.max(fmaxE, 1e-2 * fref0);
+        if (rn < 1e-7 * fref || (it >= 6 && rn < 1e-4 * fref)) return true;
+        // Dirichlet
+        let dmax = 0;
+        for (let i = 0; i < nd; i++) dmax = Math.max(dmax, Math.abs(K[i * W + bw]));
+        for (let i = 0; i < nd; i++) if (fixed[i]) {
+          for (let j = Math.max(0, i - bw); j <= Math.min(nd - 1, i + bw); j++) { K[i * W + (j - i + bw)] = 0; K[j * W + (i - j + bw)] = 0; }
+          K[i * W + bw] = dmax;
+        }
+        if (!bandLU(K, nd, bw)) return false;
+        bandSolve(K, nd, bw, rhs);
+        let du = 0;
+        for (let i = 0; i < nd; i++) du = Math.max(du, Math.abs(rhs[i]));
+        // limitar incremento (robustez)
+        if (!isFinite(du)) return false;
+        const cap = 0.05 * H;
+        let s = du > cap ? cap / du : 1;
+        uLs.set(uTry);
+        // búsqueda lineal con retroceso sobre la norma del residuo
+        let accepted = false;
+        for (let ls = 0; ls < 6; ls++) {
+          for (let i = 0; i < nd; i++) uTry[i] = uLs[i] + s * rhs[i];
+          if (assemble(uTry, dt, zp, false) && resNorm() < r2 * (1 - 1e-4 * s)) { accepted = true; break; }
+          s *= 0.5;
+        }
+        if (!accepted) { // aceptar paso pequeño de todos modos
+          for (let i = 0; i < nd; i++) uTry[i] = uLs[i] + s * rhs[i];
+          if (!assemble(uTry, dt, zp, false)) return false;
+        }
+        if (s * du < 1e-10 * H && rn < 1e-3 * fref) return true;
+      }
+      return false;
+    }
+
+    // calendario de carga
+    const depth = cfg.depthFrac * H;
+    const tLoad = depth / SPEED;
+    const nL = cfg.nLoad || 20, nU = cfg.nUnload || 20, nRec = cfg.nRec || 22;
+    const recWin = clamp(6 * Math.max(m.tau2, m.tau1), 30, 3600);
+    let sched = [];
+    function buildTail(tStart, dStart, startIdx) {
+      // descarga a la misma velocidad desde dStart y luego recuperación libre
+      const tU = dStart / SPEED;
+      const tail = [];
+      for (let i = 1; i <= nU; i++) tail.push({ t: tStart + tU * i / nU, d: dStart * (1 - i / nU), phase: 'descarga' });
+      const dt0 = Math.max(tU / nU, 0.05);
+      let lo = 1.0001, hi = 3;
+      for (let k = 0; k < 60; k++) { const mid = (lo + hi) / 2; const sm = dt0 * (Math.pow(mid, nRec) - 1) / (mid - 1); if (sm > recWin) hi = mid; else lo = mid; }
+      const q = (lo + hi) / 2;
+      let tt = tStart + tU, dd = dt0;
+      for (let i = 0; i < nRec; i++) { tt += dd; dd *= q; tail.push({ t: tt, d: -0.02 * H, phase: 'recuperación' }); }
+      sched = sched.slice(0, startIdx).concat(tail);
+    }
+    for (let i = 1; i <= nL; i++) sched.push({ t: tLoad * i / nL, d: depth * i / nL, phase: 'carga' });
+    buildTail(tLoad, depth, nL);
+    let truncated = null, stopped = null, truncN = 0;
+    const cps = [];
+
+    const topCenter = topRow; // nodo superior en el eje
+    const frames = [{ t: 0, d: 0, phase: 'inicio', F: 0, h: H, u: new Float32Array(nd), lmin: new Float32Array(mesh.ne).fill(1), lmax: new Float32Array(mesh.ne).fill(1), p: new Float32Array(mesh.ne), sz: new Float32Array(mesh.ne) }];
+    let si = 0, tNow = 0, dNow = 0, dtLast = 0, lastPhase = '', zpNow = H;
+    function advance(target) {
+      // intenta un paso; si falla, lo subdivide
+      const stack = [target];
+      while (stack.length) {
+        const tg = stack[stack.length - 1];
+        const dt = tg.t - tNow;
+        if (dt <= 1e-9) { stack.pop(); continue; }
+        const zp = H - tg.d;
+        const pf = (tg.phase === lastPhase && dtLast > 0) ? Math.min(1, dt / dtLast) : 0;
+        if (newton(zp, dt, pf)) {
+          hist.set(histTr);
+          uPrev.set(u);
+          u.set(uTry);
+          tNow = tg.t; dNow = tg.d; dtLast = dt; lastPhase = tg.phase; zpNow = zp;
+          stickOn = tg.phase === 'carga';
+          updateStick();
+          stack.pop();
+        } else {
+          if (stack.length > 6) return false;
+          stack.push({ t: tNow + dt / 2, d: dNow + (tg.d - dNow) / 2, phase: tg.phase });
+        }
+      }
+      return true;
+    }
+    function snapshot(tg) {
+      assemble(u, 1e-30, H - tg.d, false);
+      return { t: tg.t, d: Math.max(0, tg.d), phase: tg.phase, F: assemble.force, h: H + u[2 * topCenter + 1], u: Float32Array.from(u), lmin: Float32Array.from(lminE), lmax: Float32Array.from(lmaxE), p: Float32Array.from(pE), sz: Float32Array.from(szE) };
+    }
+    function step() {
+      if (si >= sched.length || !ok || stopped !== null) return true;
+      let tg = sched[si];
+      if (!advance(tg)) {
+        const firstUnload = tg.phase === 'descarga' && sched[si - 1] && sched[si - 1].phase === 'carga';
+        if ((tg.phase === 'carga' || firstUnload) && cps.length && truncN < 2) {
+          // límite alcanzado durante la carga: retroceder un cuadro y descargar desde ahí
+          const cp = cps[Math.max(0, cps.length - 2 - truncN)];
+          truncN++;
+          u.set(cp.u); uPrev.set(cp.uPrev); hist.set(cp.hist); urRef.set(cp.urRef);
+          tNow = cp.t; dNow = cp.d; dtLast = cp.dtLast; lastPhase = cp.lastPhase; zpNow = cp.zp;
+          frames.length = cp.nFrames;
+          truncated = { d: dNow, t: tNow };
+          if (firstUnload) {
+            frames.length = cp.nFrames;
+            const i0 = si - (sched.slice(0, si).reverse().findIndex(x => Math.abs(x.t - cp.t) < 1e-9));
+            si = Math.max(0, i0);
+          }
+          buildTail(tNow, dNow, si);
+          return false;
+        }
+        if (tg.phase === 'recuperación' && frames.length > 2) { stopped = tNow; return true; }
+        ok = false; return true;
+      }
+      frames.push(snapshot(tg));
+      if (tg.phase === 'carga' && !truncated) {
+        cps.push({ u: Float64Array.from(u), uPrev: Float64Array.from(uPrev), hist: Float64Array.from(hist), urRef: Float64Array.from(urRef), t: tNow, d: dNow, dtLast, lastPhase, zp: zpNow, nFrames: frames.length });
+        if (cps.length > 3) cps.shift();
+      }
+      si++;
+      return si >= sched.length;
+    }
+    return { mesh, frames, step, get ok() { return ok; }, get progress() { return si / sched.length; }, get truncated() { return truncated; }, get stopped() { return stopped; }, H, R, depth, tLoad, recWin, mat: m, cNodes };
+  }
+
+  function runSync(cfg) {
+    const s = createSim(cfg);
+    while (!s.step()) { }
+    return s;
+  }
+
+  function summarize(sim) {
+    const fr = sim.frames;
+    let Wl = 0, Wu = 0, Fmax = 0;
+    for (let i = 1; i < fr.length; i++) {
+      const a = fr[i - 1], b = fr[i];
+      if (b.phase === 'carga') Wl += 0.5 * (a.F + b.F) * (b.d - a.d);
+      if (b.phase === 'descarga') Wu += 0.5 * (a.F + b.F) * (a.d - b.d);
+      Fmax = Math.max(Fmax, b.F);
+    }
+    const lastUnl = fr.filter(f => f.phase === 'descarga').pop();
+    const last = fr[fr.length - 1];
+    return {
+      Fmax, Wl, Wu, loss: Wl > 0 ? 1 - Wu / Wl : 0,
+      setAfterUnload: lastUnl ? (sim.H - lastUnl.h) / sim.H : 0,
+      setEnd: (sim.H - last.h) / sim.H, tEnd: last.t
+    };
+  }
+
+  G.Sponge = { erf, derive, makeLaw, baseStress, uniaxialCurve, createSim, runSync, summarize, buildMesh, SPEED, T_REF, RH_REF };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script id="src-engine3d">/* Motor 3D de la esponja: dinámica explícita con escalado de masa (cuasi-estática),
+   tetraedros lineales, misma ley de material que el banco axisimétrico
+   (hiperespuma de Storåkers con curva Gibson–Ashby, Mullins y viscoelasticidad de Prony).
+   Suelo con roce de Coulomb y punzón cilíndrico rígido móvil con contacto y roce.
+   Unidades: m, Pa, s, N, kg. */
+(function (G) {
+  'use strict';
+  const S = G.Sponge;
+
+  // valores y vectores propios de una matriz simétrica 3x3 (Jacobi cíclico)
+  function eigSym3(a, w, V) {
+    let a00 = a[0], a11 = a[1], a22 = a[2], a01 = a[3], a02 = a[4], a12 = a[5];
+    V[0] = 1; V[1] = 0; V[2] = 0; V[3] = 0; V[4] = 1; V[5] = 0; V[6] = 0; V[7] = 0; V[8] = 1;
+    for (let sweep = 0; sweep < 6; sweep++) {
+      const off = a01 * a01 + a02 * a02 + a12 * a12;
+      if (off < 1e-14 * (a00 * a00 + a11 * a11 + a22 * a22 + 1e-30)) break;
+      for (let pq = 0; pq < 3; pq++) {
+        let apq, app, aqq, p, q;
+        if (pq === 0) { apq = a01; app = a00; aqq = a11; p = 0; q = 1; }
+        else if (pq === 1) { apq = a02; app = a00; aqq = a22; p = 0; q = 2; }
+        else { apq = a12; app = a11; aqq = a22; p = 1; q = 2; }
+        if (Math.abs(apq) < 1e-300) continue;
+        const th = (aqq - app) / (2 * apq);
+        const t = Math.sign(th || 1) / (Math.abs(th) + Math.sqrt(th * th + 1));
+        const c = 1 / Math.sqrt(t * t + 1), s = t * c;
+        // rotar A
+        if (pq === 0) {
+          const a02n = c * a02 - s * a12, a12n = s * a02 + c * a12;
+          a00 = app - t * apq; a11 = aqq + t * apq; a01 = 0; a02 = a02n; a12 = a12n;
+        } else if (pq === 1) {
+          const a01n = c * a01 - s * a12, a12n = s * a01 + c * a12;
+          a00 = app - t * apq; a22 = aqq + t * apq; a02 = 0; a01 = a01n; a12 = a12n;
+        } else {
+          const a01n = c * a01 - s * a02, a02n = s * a01 + c * a02;
+          a11 = app - t * apq; a22 = aqq + t * apq; a12 = 0; a01 = a01n; a02 = a02n;
+        }
+        for (let k = 0; k < 3; k++) {
+          const vkp = V[3 * k + p], vkq = V[3 * k + q];
+          V[3 * k + p] = c * vkp - s * vkq; V[3 * k + q] = s * vkp + c * vkq;
+        }
+      }
+    }
+    w[0] = a00; w[1] = a11; w[2] = a22;
+  }
+
+  // malla: disco por mapeo elíptico de un cuadrado, extruido; cada hexaedro en 6 tetraedros
+  function buildMesh(R, H, n, nz) {
+    const nn1 = n + 1, nzz = nz + 1, nn = nn1 * nn1 * nzz;
+    const X = new Float64Array(3 * nn);
+    for (let k = 0; k < nzz; k++) for (let j = 0; j < nn1; j++) for (let i = 0; i < nn1; i++) {
+      const u = -1 + 2 * i / n, v = -1 + 2 * j / n;
+      const x = u * Math.sqrt(1 - v * v / 2), y = v * Math.sqrt(1 - u * u / 2);
+      const id = (k * nn1 + j) * nn1 + i;
+      X[3 * id] = R * x; X[3 * id + 1] = R * y; X[3 * id + 2] = H * k / nz;
+    }
+    const tets = [];
+    const nid = (i, j, k) => (k * nn1 + j) * nn1 + i;
+    // división de Kuhn: 6 tetraedros que comparten la diagonal 0–6 (conforme entre vecinos)
+    const K = [[0, 1, 2, 6], [0, 2, 3, 6], [0, 3, 7, 6], [0, 7, 4, 6], [0, 4, 5, 6], [0, 5, 1, 6]];
+    for (let k = 0; k < nz; k++) for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const c = [nid(i, j, k), nid(i + 1, j, k), nid(i + 1, j + 1, k), nid(i, j + 1, k), nid(i, j, k + 1), nid(i + 1, j, k + 1), nid(i + 1, j + 1, k + 1), nid(i, j + 1, k + 1)];
+      for (const t of K) tets.push(c[t[0]], c[t[1]], c[t[2]], c[t[3]]);
+    }
+    // caras de borde (para dibujar): caras de hexaedro en el contorno, como 2 triángulos
+    const faces = [], quads = [];
+    const quad = (a, b, c, d) => { faces.push(a, b, c, a, c, d); quads.push(a, b, c, d); };
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      quad(nid(i, j, 0), nid(i, j + 1, 0), nid(i + 1, j + 1, 0), nid(i + 1, j, 0));        // base
+      quad(nid(i, j, nz), nid(i + 1, j, nz), nid(i + 1, j + 1, nz), nid(i, j + 1, nz));     // tapa
+    }
+    for (let k = 0; k < nz; k++) for (let t = 0; t < n; t++) {
+      quad(nid(t, 0, k), nid(t + 1, 0, k), nid(t + 1, 0, k + 1), nid(t, 0, k + 1));         // y = −
+      quad(nid(n, t, k), nid(n, t + 1, k), nid(n, t + 1, k + 1), nid(n, t, k + 1));         // x = +
+      quad(nid(t + 1, n, k), nid(t, n, k), nid(t, n, k + 1), nid(t + 1, n, k + 1));         // y = +
+      quad(nid(0, t + 1, k), nid(0, t, k), nid(0, t, k + 1), nid(0, t + 1, k + 1));         // x = −
+    }
+    return { X, nn, tets: Int32Array.from(tets), nt: tets.length / 4, faces: Uint32Array.from(faces), quads: Int32Array.from(quads), n, nz, nn1 };
+  }
+
+  const HL = 19; // Q1(6) Q2(6) S0prev(6) Wm
+
+  function createSim3D(cfg) {
+    const m = cfg.mat;
+    const R = cfg.R * m.scale, H = cfg.H * m.scale;
+    const mesh = buildMesh(R, H, cfg.n || 8, cfg.nz || 8);
+    const law = S.makeLaw(m);
+    const nn = mesh.nn, nt = mesh.nt, T = mesh.tets;
+    const x = Float64Array.from(mesh.X), v = new Float64Array(3 * nn), f = new Float64Array(3 * nn);
+    const mass = new Float64Array(nn), Wn = new Float64Array(nn);
+    const DmI = new Float64Array(9 * nt), V0 = new Float64Array(nt);
+    const hist = new Float64Array(HL * nt), lminT = new Float32Array(nt).fill(1);
+    let hmin = Infinity;
+    for (let e = 0; e < nt; e++) {
+      const i0 = T[4 * e], i1 = T[4 * e + 1], i2 = T[4 * e + 2], i3 = T[4 * e + 3];
+      const d = [];
+      for (const ii of [i1, i2, i3]) for (let c = 0; c < 3; c++) d.push(mesh.X[3 * ii + c] - mesh.X[3 * i0 + c]);
+      // Dm columnas = aristas
+      const a = d[0], b = d[3], c = d[6], dd = d[1], ee = d[4], ff = d[7], g = d[2], hh = d[5], ii = d[8];
+      const det = a * (ee * ii - ff * hh) - b * (dd * ii - ff * g) + c * (dd * hh - ee * g);
+      V0[e] = Math.abs(det) / 6;
+      const inv = [(ee * ii - ff * hh) / det, (c * hh - b * ii) / det, (b * ff - c * ee) / det,
+        (ff * g - dd * ii) / det, (a * ii - c * g) / det, (c * dd - a * ff) / det,
+        (dd * hh - ee * g) / det, (b * g - a * hh) / det, (a * ee - b * dd) / det];
+      for (let k = 0; k < 9; k++) DmI[9 * e + k] = inv[k];
+      for (const q of [0, 3, 6]) hmin = Math.min(hmin, Math.hypot(d[q], d[q + 1], d[q + 2]));
+    }
+    // escalado de masa: período axial fundamental ≈ Tnat (cuasi-estático frente a la mano)
+    const Einst = m.E * (1 + m.g1 + m.g2);
+    const Tnat = cfg.Tnat || 0.25;
+    const cWave = 4 * H / Tnat, rhoS = Einst / (cWave * cWave);
+    const dt = 0.45 * hmin / (cWave * Math.sqrt(cfg.stiffMargin || 6));
+    const rhoReal = cfg.rhoReal || 30;
+    for (let e = 0; e < nt; e++) for (let k = 0; k < 4; k++) { mass[T[4 * e + k]] += rhoS * V0[e] / 4; Wn[T[4 * e + k]] += 9.81 * rhoReal * V0[e] / 4; }
+    const stiffCap = (cfg.stiffMargin || 6) * Einst;
+    const kN = new Float64Array(nn).fill(1);
+    const damp = cfg.damp || 0.35 * 4 * Math.PI / Tnat;
+    // viscoelasticidad
+    const e1 = Math.exp(-dt / m.tau1), f1 = m.tau1 / dt * (1 - e1), e2 = Math.exp(-dt / m.tau2), f2 = m.tau2 / dt * (1 - e2);
+    const mr = m.mullR, mm = m.mullM * law.wref;
+    // contacto
+    const hTyp = H / (cfg.nz || 8);
+    const kC = 40 * m.E * hTyp; // N/m por nodo aprox.
+    const nodeArea = (Math.PI * R * R) / ((cfg.n || 8) + 1) ** 2;
+    // rigidez de contacto limitada por estabilidad del paso explícito (por nodo)
+    const kNode = new Float64Array(nn), under = new Uint8Array(nn);
+    const vEps = 2e-4;
+    for (let i = 0; i < nn; i++) kNode[i] = 0.2 * mass[i] / (dt * dt);
+    const punch = { x: 0, y: 0, z: H + 0.01, a: cfg.a, tx: 0, ty: 0, tz: H + 0.01, speed: cfg.speed || 0.02, F: 0, Fx: 0, Fy: 0 };
+    const state = { t: 0, base: cfg.base || 'free', muFloor: cfg.muFloor ?? 0.6, muPunch: cfg.muPunch ?? 0.8, broken: 0, brokenNew: false, unstable: false };
+    const dead = new Uint8Array(nt);
+    const lamBreak2 = m.lamBreak ? m.lamBreak * m.lamBreak : 0;
+    // gravedad efectiva: con la masa escalada, la gravedad real no alcanzaría a hacer caer la esponja;
+    // se usa un peso efectivo pequeño (5 % de la meseta sobre la base) que sí la asienta sin deformarla
+    let Mtot = 0; for (let i = 0; i < nn; i++) Mtot += mass[i];
+    let Wreal = 0; for (let i = 0; i < nn; i++) Wreal += Wn[i];
+    const aG = Math.max(Wreal, 0.05 * m.sigPl * Math.PI * R * R) / Mtot;
+    // puntos de contacto sobre la superficie (3×3 por cara), para que el punzón no pase entre nodos
+    const Q = mesh.quads, nq = Q.length / 4, SU = [1 / 6, 1 / 2, 5 / 6];
+    const ns = nq * 9, sW = new Float64Array(ns * 4), sN = new Int32Array(ns * 4), sK = new Float64Array(ns), sUnder = new Uint8Array(ns);
+    for (let q = 0, k = 0; q < nq; q++) for (const uu of SU) for (const vv of SU) {
+      const w = [(1 - uu) * (1 - vv), uu * (1 - vv), uu * vv, (1 - uu) * vv];
+      let mmin = Infinity;
+      for (let c = 0; c < 4; c++) { sN[4 * k + c] = Q[4 * q + c]; sW[4 * k + c] = w[c]; mmin = Math.min(mmin, mass[Q[4 * q + c]]); }
+      sK[k] = 0.2 * mmin / (dt * dt) / 9;
+      k++;
+    }
+
+    const Cm = new Float64Array(6), w3 = new Float64Array(3), Vv = new Float64Array(9);
+    const S0 = new Float64Array(6), Sx = new Float64Array(6), sv = new Float64Array(3);
+    const Cr = new Float64Array(6), Vr = new Float64Array(9);
+    const Vst = new Float64Array(9 * nt);
+    function resetV() { for (let e = 0; e < nt; e++) { Vst.fill(0, 9 * e, 9 * e + 9); Vst[9 * e] = Vst[9 * e + 4] = Vst[9 * e + 8] = 1; } }
+    resetV();
+
+    function forces() {
+      f.fill(0); kN.fill(1);
+      for (let e = 0; e < nt; e++) {
+        if (dead[e]) continue;
+        const i0 = T[4 * e], i1 = T[4 * e + 1], i2 = T[4 * e + 2], i3 = T[4 * e + 3];
+        const x0 = x[3 * i0], y0 = x[3 * i0 + 1], z0 = x[3 * i0 + 2];
+        const d00 = x[3 * i1] - x0, d10 = x[3 * i1 + 1] - y0, d20 = x[3 * i1 + 2] - z0;
+        const d01 = x[3 * i2] - x0, d11 = x[3 * i2 + 1] - y0, d21 = x[3 * i2 + 2] - z0;
+        const d02 = x[3 * i3] - x0, d12 = x[3 * i3 + 1] - y0, d22 = x[3 * i3 + 2] - z0;
+        const o = 9 * e;
+        const B0 = DmI[o], B1 = DmI[o + 1], B2 = DmI[o + 2], B3 = DmI[o + 3], B4 = DmI[o + 4], B5 = DmI[o + 5], B6 = DmI[o + 6], B7 = DmI[o + 7], B8 = DmI[o + 8];
+        // F = Ds · Dm⁻¹
+        const F00 = d00 * B0 + d01 * B3 + d02 * B6, F01 = d00 * B1 + d01 * B4 + d02 * B7, F02 = d00 * B2 + d01 * B5 + d02 * B8;
+        const F10 = d10 * B0 + d11 * B3 + d12 * B6, F11 = d10 * B1 + d11 * B4 + d12 * B7, F12 = d10 * B2 + d11 * B5 + d12 * B8;
+        const F20 = d20 * B0 + d21 * B3 + d22 * B6, F21 = d20 * B1 + d21 * B4 + d22 * B7, F22 = d20 * B2 + d21 * B5 + d22 * B8;
+        const J = F00 * (F11 * F22 - F12 * F21) - F01 * (F10 * F22 - F12 * F20) + F02 * (F10 * F21 - F11 * F20);
+        Cm[0] = F00 * F00 + F10 * F10 + F20 * F20; Cm[1] = F01 * F01 + F11 * F11 + F21 * F21; Cm[2] = F02 * F02 + F12 * F12 + F22 * F22;
+        Cm[3] = F00 * F01 + F10 * F11 + F20 * F21; Cm[4] = F00 * F02 + F10 * F12 + F20 * F22; Cm[5] = F01 * F02 + F11 * F12 + F21 * F22;
+        { // arranque en caliente: rotar C a la base propia del paso anterior (casi diagonal)
+          const o9 = 9 * e;
+          const q0 = Vst[o9], q1 = Vst[o9 + 1], q2 = Vst[o9 + 2], q3 = Vst[o9 + 3], q4 = Vst[o9 + 4], q5 = Vst[o9 + 5], q6 = Vst[o9 + 6], q7 = Vst[o9 + 7], q8 = Vst[o9 + 8];
+          const c00 = Cm[0], c11 = Cm[1], c22 = Cm[2], c01 = Cm[3], c02 = Cm[4], c12 = Cm[5];
+          // M = C·Q
+          const m00 = c00 * q0 + c01 * q3 + c02 * q6, m01 = c00 * q1 + c01 * q4 + c02 * q7, m02 = c00 * q2 + c01 * q5 + c02 * q8;
+          const m10 = c01 * q0 + c11 * q3 + c12 * q6, m11 = c01 * q1 + c11 * q4 + c12 * q7, m12 = c01 * q2 + c11 * q5 + c12 * q8;
+          const m20 = c02 * q0 + c12 * q3 + c22 * q6, m21 = c02 * q1 + c12 * q4 + c22 * q7, m22 = c02 * q2 + c12 * q5 + c22 * q8;
+          // C' = Qᵀ·M
+          Cr[0] = q0 * m00 + q3 * m10 + q6 * m20; Cr[1] = q1 * m01 + q4 * m11 + q7 * m21; Cr[2] = q2 * m02 + q5 * m12 + q8 * m22;
+          Cr[3] = q0 * m01 + q3 * m11 + q6 * m21; Cr[4] = q0 * m02 + q3 * m12 + q6 * m22; Cr[5] = q1 * m02 + q4 * m12 + q7 * m22;
+          eigSym3(Cr, w3, Vr);
+          // V = Q·V'
+          for (let r = 0; r < 3; r++) {
+            const a0 = Vst[o9 + 3 * r], a1 = Vst[o9 + 3 * r + 1], a2 = Vst[o9 + 3 * r + 2];
+            Vv[3 * r] = a0 * Vr[0] + a1 * Vr[3] + a2 * Vr[6];
+            Vv[3 * r + 1] = a0 * Vr[1] + a1 * Vr[4] + a2 * Vr[7];
+            Vv[3 * r + 2] = a0 * Vr[2] + a1 * Vr[5] + a2 * Vr[8];
+          }
+          for (let k = 0; k < 9; k++) Vst[o9 + k] = Vv[k];
+        }
+        const c1 = Math.max(w3[0], 1e-4), c2 = Math.max(w3[1], 1e-4), c3 = Math.max(w3[2], 1e-4);
+        // ruptura: si una pared se estira más de lo que aguanta, el elemento se corta
+        if (lamBreak2 > 0 && Math.max(c1, c2, c3) > lamBreak2) { dead[e] = 1; state.broken++; state.brokenNew = true; continue; }
+        const g1 = 0.5 * Math.log(c1), g2 = 0.5 * Math.log(c2), g3 = 0.5 * Math.log(c3);
+        const lnJ = g1 + g2 + g3, eb = -law.beta * lnJ;
+        const Tb = law.beta > 0 ? law.Tof(eb) : 0;
+        // antiinversión: si el volumen se acerca a cero, presión de rechazo
+        let tAnti = 0;
+        const Jmin = 0.06;
+        if (J < Jmin) tAnti = 50 * m.E * (Jmin - J) / Jmin;
+        const s1 = (law.Tof(g1) - Tb + tAnti) / c1, s2 = (law.Tof(g2) - Tb + tAnti) / c2, s3 = (law.Tof(g3) - Tb + tAnti) / c3;
+        // S0 = Σ s_i N_i N_iᵀ  (Voigt: 00,11,22,01,02,12)
+        S0[0] = S0[1] = S0[2] = S0[3] = S0[4] = S0[5] = 0;
+        sv[0] = s1; sv[1] = s2; sv[2] = s3;
+        for (let k = 0; k < 3; k++) {
+          const nx = Vv[k], ny = Vv[3 + k], nz = Vv[6 + k], s = sv[k];
+          S0[0] += s * nx * nx; S0[1] += s * ny * ny; S0[2] += s * nz * nz; S0[3] += s * nx * ny; S0[4] += s * nx * nz; S0[5] += s * ny * nz;
+        }
+        const h = HL * e;
+        let eta = 1;
+        if (mr > 1) {
+          const W = law.Phi(g1) + law.Phi(g2) + law.Phi(g3) + (law.beta > 1e-9 ? law.Phi(eb) / law.beta : 0);
+          const Wm = Math.max(hist[h + 18], W);
+          eta = 1 - (1 / mr) * S.erf((Wm - W) / (mm + 0.1 * Wm));
+          hist[h + 18] = Wm;
+        }
+        for (let k = 0; k < 6; k++) {
+          const dS = S0[k] - hist[h + 12 + k];
+          const q1 = e1 * hist[h + k] + m.g1 * f1 * dS, q2 = e2 * hist[h + 6 + k] + m.g2 * f2 * dS;
+          hist[h + k] = q1; hist[h + 6 + k] = q2; hist[h + 12 + k] = S0[k];
+          Sx[k] = eta * S0[k] + q1 + q2;
+        }
+        lminT[e] = Math.sqrt(Math.min(c1, c2, c3));
+        { // rigidez tangente local → escalado de masa dinámico (estabilidad en densificación)
+          const kt = Math.max(law.dT(g1), law.dT(g2), law.dT(g3)) + law.beta * (law.beta > 0 ? law.dT(eb) : 0) + (J < Jmin ? 50 * m.E / Jmin : 0);
+          const r = kt * (1 + m.g1 + m.g2) / (stiffCap);
+          if (r > kN[i0]) kN[i0] = r; if (r > kN[i1]) kN[i1] = r; if (r > kN[i2]) kN[i2] = r; if (r > kN[i3]) kN[i3] = r;
+        }
+        // P = F S
+        const S00 = Sx[0], S11 = Sx[1], S22 = Sx[2], S01 = Sx[3], S02 = Sx[4], S12 = Sx[5];
+        const P00 = F00 * S00 + F01 * S01 + F02 * S02, P01 = F00 * S01 + F01 * S11 + F02 * S12, P02 = F00 * S02 + F01 * S12 + F02 * S22;
+        const P10 = F10 * S00 + F11 * S01 + F12 * S02, P11 = F10 * S01 + F11 * S11 + F12 * S12, P12 = F10 * S02 + F11 * S12 + F12 * S22;
+        const P20 = F20 * S00 + F21 * S01 + F22 * S02, P21 = F20 * S01 + F21 * S11 + F22 * S12, P22 = F20 * S02 + F21 * S12 + F22 * S22;
+        // H = −V0 P Dm⁻ᵀ ; columnas = fuerzas en nodos 1..3
+        const vol = V0[e];
+        const H00 = -vol * (P00 * B0 + P01 * B1 + P02 * B2), H01 = -vol * (P00 * B3 + P01 * B4 + P02 * B5), H02 = -vol * (P00 * B6 + P01 * B7 + P02 * B8);
+        const H10 = -vol * (P10 * B0 + P11 * B1 + P12 * B2), H11 = -vol * (P10 * B3 + P11 * B4 + P12 * B5), H12 = -vol * (P10 * B6 + P11 * B7 + P12 * B8);
+        const H20 = -vol * (P20 * B0 + P21 * B1 + P22 * B2), H21 = -vol * (P20 * B3 + P21 * B4 + P22 * B5), H22 = -vol * (P20 * B6 + P21 * B7 + P22 * B8);
+        f[3 * i1] += H00; f[3 * i1 + 1] += H10; f[3 * i1 + 2] += H20;
+        f[3 * i2] += H01; f[3 * i2 + 1] += H11; f[3 * i2 + 2] += H21;
+        f[3 * i3] += H02; f[3 * i3 + 1] += H12; f[3 * i3 + 2] += H22;
+        f[3 * i0] -= H00 + H01 + H02; f[3 * i0 + 1] -= H10 + H11 + H12; f[3 * i0 + 2] -= H20 + H21 + H22;
+      }
+    }
+
+    function contacts(pvx, pvy, pvz) {
+      let Fz = 0, Fx = 0, Fy = 0;
+      const glued = state.base === 'glued';
+      for (let i = 0; i < nn; i++) {
+        const ix = 3 * i;
+        f[ix + 2] -= mass[i] * aG;
+        // suelo
+        const zz = x[ix + 2];
+        if (!glued && zz < 0) {
+          const N = kNode[i] * kN[i] * (-zz);
+          f[ix + 2] += N;
+          const vt = Math.hypot(v[ix], v[ix + 1]);
+          const ft = Math.min(state.muFloor * N / Math.sqrt(vt * vt + vEps * vEps), 0.4 * mass[i] * kN[i] / dt);
+          f[ix] -= ft * v[ix]; f[ix + 1] -= ft * v[ix + 1];
+        }
+        // punzón (cilindro rígido, cara inferior plana)
+        const dx = x[ix] - punch.x, dy = x[ix + 1] - punch.y, r = Math.hypot(dx, dy);
+        const pen = zz - punch.z;
+        if (pen > 0 && r < punch.a) {
+          const side = punch.a - r;
+          if (under[i] || pen <= side) {
+            const N = kNode[i] * kN[i] * pen;
+            f[ix + 2] -= N; Fz += N;
+            const rvx = v[ix] - pvx, rvy = v[ix + 1] - pvy, vt = Math.hypot(rvx, rvy);
+            const ft = Math.min(state.muPunch * N / Math.sqrt(vt * vt + vEps * vEps), 0.4 * mass[i] * kN[i] / dt);
+            f[ix] -= ft * rvx; f[ix + 1] -= ft * rvy; Fx += ft * rvx; Fy += ft * rvy;
+          } else {
+            const N = kNode[i] * kN[i] * side, ux = r > 1e-12 ? dx / r : 1, uy = r > 1e-12 ? dy / r : 0;
+            f[ix] += N * ux; f[ix + 1] += N * uy; Fx -= N * ux; Fy -= N * uy;
+          }
+        }
+      }
+      for (let k = 0; k < ns; k++) {
+        const o4 = 4 * k;
+        let px = 0, py = 0, pz = 0, svx = 0, svy = 0, kn = 0;
+        for (let c = 0; c < 4; c++) { const n = sN[o4 + c], w = sW[o4 + c]; px += w * x[3 * n]; py += w * x[3 * n + 1]; pz += w * x[3 * n + 2]; svx += w * v[3 * n]; svy += w * v[3 * n + 1]; kn += w * kN[n]; }
+        const pen = pz - punch.z; if (pen <= 0) continue;
+        const dx = px - punch.x, dy = py - punch.y, r = Math.hypot(dx, dy);
+        if (r >= punch.a) continue;
+        const side = punch.a - r, kk = sK[k] * kn;
+        let fx = 0, fy = 0, fz = 0;
+        if (sUnder[k] || pen <= side) {
+          const N = kk * pen; fz = -N; Fz += N;
+          const rvx = svx - pvx, rvy = svy - pvy, vt = Math.hypot(rvx, rvy);
+          const ft = Math.min(state.muPunch * N / Math.sqrt(vt * vt + vEps * vEps), 2 * sK[k] * kn * dt);
+          fx = -ft * rvx; fy = -ft * rvy; Fx -= fx; Fy -= fy;
+        } else {
+          const N = kk * side, ux = r > 1e-12 ? dx / r : 1, uy = r > 1e-12 ? dy / r : 0;
+          fx = N * ux; fy = N * uy; Fx -= fx; Fy -= fy;
+        }
+        for (let c = 0; c < 4; c++) { const n = sN[o4 + c], w = sW[o4 + c]; f[3 * n] += w * fx; f[3 * n + 1] += w * fy; f[3 * n + 2] += w * fz; }
+      }
+      punch.F = Fz; punch.Fx = Fx; punch.Fy = Fy;
+    }
+    function markUnder() { // nodos que están bajo la cara del punzón (entrarán por abajo, no por el costado)
+      for (let i = 0; i < nn; i++) {
+        const dx = x[3 * i] - punch.x, dy = x[3 * i + 1] - punch.y;
+        under[i] = (x[3 * i + 2] <= punch.z + 1e-6 && Math.hypot(dx, dy) < punch.a) ? 1 : (x[3 * i + 2] <= punch.z ? under[i] : 0);
+      }
+      for (let k = 0; k < ns; k++) {
+        const o4 = 4 * k; let px = 0, py = 0, pz = 0;
+        for (let c = 0; c < 4; c++) { const n = sN[o4 + c], w = sW[o4 + c]; px += w * x[3 * n]; py += w * x[3 * n + 1]; pz += w * x[3 * n + 2]; }
+        const inR = Math.hypot(px - punch.x, py - punch.y) < punch.a;
+        sUnder[k] = (pz <= punch.z + 1e-6 && inR) ? 1 : (pz <= punch.z ? sUnder[k] : 0);
+      }
+    }
+
+    function step() {
+      // mover el punzón hacia su objetivo a velocidad limitada
+      const ddx = punch.tx - punch.x, ddy = punch.ty - punch.y, ddz = punch.tz - punch.z;
+      const dist = Math.hypot(ddx, ddy, ddz), maxd = punch.speed * dt;
+      let pvx = 0, pvy = 0, pvz = 0;
+      if (dist > 1e-12) {
+        const s = Math.min(1, maxd / dist);
+        pvx = ddx * s / dt; pvy = ddy * s / dt; pvz = ddz * s / dt;
+        punch.x += ddx * s; punch.y += ddy * s; punch.z += ddz * s;
+      }
+      forces();
+      contacts(pvx, pvy, pvz);
+      const glued = state.base === 'glued';
+      const vmax = 0.5, dmp = 1 / (1 + damp * dt), dmpR = 1 / (1 + 0.5 * dt);
+      // velocidades sin amortiguar
+      for (let i = 0; i < nn; i++) {
+        const ix = 3 * i;
+        if (glued && i < mesh.nn1 * mesh.nn1) { v[ix] = v[ix + 1] = v[ix + 2] = 0; continue; }
+        const im = dt / (mass[i] * kN[i]);
+        v[ix] += im * f[ix]; v[ix + 1] += im * f[ix + 1]; v[ix + 2] += im * f[ix + 2];
+      }
+      // separar el movimiento rígido (traslación + giro) de la deformación:
+      // sólo la deformación se amortigua fuerte; la esponja puede deslizar, caer o volcarse
+      let M = 0, cx = 0, cy = 0, cz = 0, px = 0, py = 0, pz = 0;
+      for (let i = 0; i < nn; i++) { const mi = mass[i]; M += mi; cx += mi * x[3 * i]; cy += mi * x[3 * i + 1]; cz += mi * x[3 * i + 2]; px += mi * v[3 * i]; py += mi * v[3 * i + 1]; pz += mi * v[3 * i + 2]; }
+      cx /= M; cy /= M; cz /= M; const vcx = px / M, vcy = py / M, vcz = pz / M;
+      let Lx = 0, Ly = 0, Lz = 0, I00 = 0, I11 = 0, I22 = 0, I01 = 0, I02 = 0, I12 = 0;
+      for (let i = 0; i < nn; i++) {
+        const mi = mass[i], rx = x[3 * i] - cx, ry = x[3 * i + 1] - cy, rz = x[3 * i + 2] - cz;
+        const ux = v[3 * i] - vcx, uy = v[3 * i + 1] - vcy, uz = v[3 * i + 2] - vcz;
+        Lx += mi * (ry * uz - rz * uy); Ly += mi * (rz * ux - rx * uz); Lz += mi * (rx * uy - ry * ux);
+        const r2 = rx * rx + ry * ry + rz * rz;
+        I00 += mi * (r2 - rx * rx); I11 += mi * (r2 - ry * ry); I22 += mi * (r2 - rz * rz);
+        I01 -= mi * rx * ry; I02 -= mi * rx * rz; I12 -= mi * ry * rz;
+      }
+      const det = I00 * (I11 * I22 - I12 * I12) - I01 * (I01 * I22 - I12 * I02) + I02 * (I01 * I12 - I11 * I02);
+      let wx = 0, wy = 0, wz = 0;
+      if (Math.abs(det) > 1e-30) {
+        wx = ((I11 * I22 - I12 * I12) * Lx + (I02 * I12 - I01 * I22) * Ly + (I01 * I12 - I02 * I11) * Lz) / det;
+        wy = ((I12 * I02 - I01 * I22) * Lx + (I00 * I22 - I02 * I02) * Ly + (I02 * I01 - I00 * I12) * Lz) / det;
+        wz = ((I01 * I12 - I11 * I02) * Lx + (I01 * I02 - I00 * I12) * Ly + (I00 * I11 - I01 * I01) * Lz) / det;
+      }
+      if (glued) { wx = wy = wz = 0; }
+      for (let i = 0; i < nn; i++) {
+        const ix = 3 * i;
+        if (glued && i < mesh.nn1 * mesh.nn1) continue;
+        const rx = x[ix] - cx, ry = x[ix + 1] - cy, rz = x[ix + 2] - cz;
+        const rgx = glued ? 0 : vcx + wy * rz - wz * ry, rgy = glued ? 0 : vcy + wz * rx - wx * rz, rgz = glued ? 0 : vcz + wx * ry - wy * rx;
+        let a0 = rgx * dmpR + (v[ix] - rgx) * dmp, a1 = rgy * dmpR + (v[ix + 1] - rgy) * dmp, a2 = rgz * dmpR + (v[ix + 2] - rgz) * dmp;
+        if (a0 > vmax) a0 = vmax; else if (a0 < -vmax) a0 = -vmax;
+        if (a1 > vmax) a1 = vmax; else if (a1 < -vmax) a1 = -vmax;
+        if (a2 > vmax) a2 = vmax; else if (a2 < -vmax) a2 = -vmax;
+        v[ix] = a0; v[ix + 1] = a1; v[ix + 2] = a2;
+        x[ix] += dt * a0; x[ix + 1] += dt * a1; x[ix + 2] += dt * a2;
+      }
+      // vigilancia numérica
+      if (!(Math.abs(cx) < 1 && Math.abs(cy) < 1 && cz > -0.5 && cz < 1)) state.unstable = true;
+      markUnder();
+      state.t += dt;
+    }
+
+    function reset() {
+      x.set(mesh.X); v.fill(0); hist.fill(0); lminT.fill(1); under.fill(0); sUnder.fill(0); dead.fill(0); resetV();
+      state.broken = 0; state.brokenNew = true; state.unstable = false;
+      punch.x = punch.tx = 0; punch.y = punch.ty = 0; punch.z = punch.tz = H + 0.01;
+      state.t = 0;
+    }
+
+    function centroid() {
+      let sx = 0, sy = 0, sz = 0;
+      for (let i = 0; i < nn; i++) { sx += x[3 * i]; sy += x[3 * i + 1]; sz += x[3 * i + 2]; }
+      return [sx / nn, sy / nn, sz / nn];
+    }
+    function topCenterZ() { // altura máxima de la tapa cerca del centro
+      return x[3 * (mesh.nz * mesh.nn1 * mesh.nn1 + (mesh.n / 2) * mesh.nn1 + mesh.n / 2) + 2];
+    }
+
+    return { mesh, x, v, lminT, dead, punch, state, step, reset, centroid, topCenterZ, R, H, dt, mat: m, rhoS, hmin };
+  }
+
+  G.Sponge3D = { createSim3D, eigSym3, buildMesh };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>(function () {
+  'use strict';
+  const S = window.Sponge, PRE = window.SPONGE_PRESETS;
+  const $ = id => document.getElementById(id);
+  const LS_KEY = 'esponja-punzon.v2';
+
+  /* ---------- ficha: definición y explicaciones ---------- */
+  const GROUPS = [
+    { id: 'solido', t: 'Sólido base', d: 'El material de las paredes de las celdas. Su rigidez cambia con la temperatura y la humedad.' },
+    { id: 'espuma', t: 'Estructura de la espuma', d: 'Cómo ese sólido se organiza en celdas abiertas. Leyes de escala de Gibson y Ashby.' },
+    { id: 'humedad', t: 'Humedad y temperatura', d: 'Cuánta agua absorbe el sólido del aire y qué le hace, más los cambios de tamaño.' },
+    { id: 'tiempo', t: 'Recuperación e histéresis', d: 'Pérdida de energía al descargar y recuperación lenta. Tiempos medidos a 23 °C y 50 % de humedad relativa.' }
+  ];
+  const DEFS = [
+    { g: 'solido', k: 'Er', l: 'Módulo del sólido gomoso', u: 'MPa', ex: 'Rigidez del sólido por encima de su transición vítrea, a 23 °C. Sube levemente con la temperatura absoluta, como en todo caucho.' },
+    { g: 'solido', k: 'Eg', l: 'Módulo del sólido vítreo', u: 'MPa', ex: 'Rigidez del sólido por debajo de la transición vítrea. Si es igual al gomoso, la temperatura casi no cambia la esponja.' },
+    { g: 'solido', k: 'Tg0', l: 'Tg del sólido seco', u: '°C', ex: 'Temperatura de transición vítrea sin agua absorbida. Cerca de ella el sólido pasa de rígido a blando y la recuperación se vuelve lenta.' },
+    { g: 'solido', k: 'wTg', l: 'Ancho de la transición', u: 'K', ex: 'Cuántos grados toma pasar de vítreo a gomoso. Polímeros amorfos: 5 a 15 K; semicristalinos como la celulosa: más ancho.' },
+    { g: 'solido', k: 'rhoS', l: 'Densidad del sólido', u: 'kg/m³', ex: 'Densidad del material macizo. Con la densidad de la espuma da la fracción de sólido.' },
+    { g: 'solido', k: 'ysRatio', l: 'Fluencia del sólido / módulo', u: '', ex: 'Resistencia a la fluencia del sólido vítreo dividida por su módulo (polímeros vítreos: ≈ 0,03). Decide si las celdas pandean y recuperan, o fluyen y quedan marcadas.' },
+    { g: 'espuma', k: 'rhoF', l: 'Densidad de la espuma', u: 'kg/m³', ex: 'Masa por volumen de la esponja seca. Es el parámetro más influyente: rigidez y meseta crecen con el cuadrado de la fracción de sólido.' },
+    { g: 'espuma', k: 'C1', l: 'Coeficiente de rigidez C₁', u: '', ex: 'E* = C₁ · Es · φ². Vale ≈ 1 para celda abierta. Es el primer valor a ajustar si tienes la pendiente inicial de un ensayo real.' },
+    { g: 'espuma', k: 'C2', l: 'Coeficiente de meseta C₂', u: '', ex: 'σ = C₂ · Es · φ². Vale ≈ 0,05 para pandeo elástico de celdas. Ajústalo con la tensión de meseta medida.' },
+    { g: 'espuma', k: 'nu', l: 'Coeficiente de Poisson ν', u: '', ex: 'Cuánto se ensancha de lado al aplastarla, en toda la compresión: a una fracción λ del alto, el ancho crece a λ^−ν (hiperespuma de Storåkers). Espumas de celda abierta en compresión grande: 0 a 0,1; espumas de celda cerrada y esponjas de caucho: más. Máximo 0,35.' },
+    { g: 'espuma', k: 'hard', l: 'Subida de la meseta', u: '', ex: 'Cuánto sube la tensión entre 0 % y 50 % de compresión, como fracción de la meseta. Las espumas reales nunca tienen una meseta perfectamente plana.' },
+    { g: 'espuma', k: 'epsL', l: 'Deformación de bloqueo', u: '', auto: true, ex: 'Compresión a la que ya no queda vacío entre celdas. 0 = automático, 1 − 1,4 φ (Gibson–Ashby).' },
+    { g: 'espuma', k: 'epsOn', l: 'Inicio de densificación', u: '', auto: true, ex: 'Compresión donde la tensión dobla la de meseta. 0 = automático, bloqueo − 0,30, que coincide con ensayos de espumas flexibles.' },
+    { g: 'espuma', k: 'lamB', l: 'Estiramiento de ruptura', u: '', ex: 'Cuánto se puede estirar la espuma antes de desgarrarse: 2,2 significa 120 % de alargamiento (poliuretano típico). Si el sólido está vítreo baja hasta un 70 %, porque se vuelve frágil. Al pasarlo aparece el aviso de ruptura.' },
+    { g: 'espuma', k: 'poreD', l: 'Diámetro de poro', u: 'mm', ex: 'No cambia la rigidez. Sirve para el agua capilar que sostendría y para avisar si el punzón es demasiado chico para tratar la esponja como un medio continuo.' },
+    { g: 'espuma', k: 'theta', l: 'Ángulo de contacto con agua', u: '°', ex: 'Qué tanto moja el agua al sólido. Menos de 90° retiene agua por capilaridad; más de 90° la repele.' },
+    { g: 'humedad', k: 'gabMm', l: 'GAB · capa monomolecular', u: 'kg/kg', ex: 'Agua que cubre una capa molecular del sólido. Isoterma GAB: convierte la humedad del aire en humedad dentro del sólido.' },
+    { g: 'humedad', k: 'gabC', l: 'GAB · constante C', u: '', ex: 'Afinidad de la primera capa de agua. Valores altos: absorbe mucho ya a humedad baja.' },
+    { g: 'humedad', k: 'gabK', l: 'GAB · constante K', u: '', ex: 'Absorción de capas sucesivas, menor que 1. Controla cuánto sube la humedad del sólido cerca de 100 %.' },
+    { g: 'humedad', k: 'gtK', l: 'Plastificación por agua (Gordon–Taylor k)', u: '', ex: 'Cuánto baja la Tg por cada gramo de agua absorbida. Alto en celulosa, bajo en poliuretano.' },
+    { g: 'humedad', k: 'betaH', l: 'Hinchamiento por humedad', u: '', ex: 'Deformación lineal por unidad de humedad absorbida. Cambia el tamaño del cilindro antes del ensayo.' },
+    { g: 'humedad', k: 'alphaT', l: 'Dilatación térmica', u: '10⁻⁶/K', sc: 1e6, ex: 'Dilatación lineal por grado. Cambia el tamaño del cilindro antes del ensayo.' },
+    { g: 'tiempo', k: 'g1', l: 'Rama viscosa rápida · fracción', u: '', ex: 'Rigidez extra que aparece al cargar rápido y se relaja en el tiempo τ₁. Explica parte de la histéresis.' },
+    { g: 'tiempo', k: 'tau1', l: 'Rama viscosa rápida · τ₁', u: 's', ex: 'Tiempo de relajación de la rama rápida a 23 °C y 50 % HR.' },
+    { g: 'tiempo', k: 'g2', l: 'Rama viscosa lenta · fracción', u: '', ex: 'Rigidez extra de relajación lenta. Es la que deja la esponja hundida un rato después de soltar.' },
+    { g: 'tiempo', k: 'tau2', l: 'Rama viscosa lenta · τ₂', u: 's', ex: 'Tiempo de relajación de la rama lenta a 23 °C y 50 % HR. En espumas de memoria va de segundos a minutos.' },
+    { g: 'tiempo', k: 'wlfC1', l: 'WLF · C₁', u: '', ex: 'Por encima de Tg, cuántas décadas se acortan los tiempos al alejarse de Tg (ecuación WLF).' },
+    { g: 'tiempo', k: 'wlfC2', l: 'WLF · C₂', u: 'K', ex: 'Escala de temperatura de la ecuación WLF.' },
+    { g: 'tiempo', k: 'Ea', l: 'Energía de activación bajo Tg', u: 'kJ/mol', ex: 'Por debajo de Tg los tiempos siguen la ley de Arrhenius con esta energía.' },
+    { g: 'tiempo', k: 'mullR', l: 'Efecto Mullins · r', u: '', ex: 'Ablandamiento al descargar después de la primera compresión: la tensión baja hasta en 1/r. 1 = sin efecto.' },
+    { g: 'tiempo', k: 'mullM', l: 'Efecto Mullins · m', u: '', ex: 'Qué tan pronto aparece ese ablandamiento al empezar a descargar. Valores chicos: aparece de inmediato.' }
+  ];
+
+  /* ---------- estado ---------- */
+  const st = { key: 'pu', baseKey: 'pu', custom: false, p: Object.assign({}, PRE.pu), T: 23, RH: 50, R: 2.5, H: 5, a: 1, depth: 40, base: 'glued', zone: null, zoneN: 10 };
+  function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(st)); } catch (e) { } }
+  function load() {
+    try {
+      const raw = localStorage.getItem(LS_KEY); if (!raw) return;
+      const o = JSON.parse(raw);
+      if (o && o.p && (PRE[o.baseKey] || PRE[o.key])) Object.assign(st, o, { p: Object.assign({}, PRE[o.baseKey || 'pu'], o.p) });
+    } catch (e) { }
+  }
+
+  const nf = (x, d) => (isFinite(x) ? x.toLocaleString('es-CL', { maximumFractionDigits: d, minimumFractionDigits: 0 }) : '—');
+  const sig = (x, n = 3) => {
+    if (!isFinite(x)) return '—';
+    if (x === 0) return '0';
+    const dgt = Math.max(0, n - 1 - Math.floor(Math.log10(Math.abs(x))));
+    return x.toLocaleString('es-CL', { maximumFractionDigits: Math.min(dgt, 6) });
+  };
+
+  /* ---------- colores ---------- */
+  let C = {};
+  function hexRgb(h) { h = h.trim(); if (h[0] === '#') { const v = parseInt(h.slice(1), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; } const m = h.match(/\d+/g); return m ? m.slice(0, 3).map(Number) : [128, 128, 128]; }
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ['bg', 'surface', 'ink', 'muted', 'line', 'accent', 'punch', 'load', 'unload', 'rupture', 'foam0', 'foam1', 'foam2', 'foam3']) C[k] = cs.getPropertyValue('--' + k).trim();
+    C.rgb = ['foam0', 'foam1', 'foam2', 'foam3'].map(k => hexRgb(C[k]));
+  }
+  function foamColor(c, m) {
+    const stops = [0, Math.max(m.epsY, 0.005), m.epsOn, m.epsL];
+    let i = 0;
+    if (c <= 0) return C.rgb[0];
+    if (c >= stops[3]) return C.rgb[3];
+    while (i < 2 && c > stops[i + 1]) i++;
+    const f = (c - stops[i]) / (stops[i + 1] - stops[i]);
+    const a = C.rgb[i], b = C.rgb[i + 1];
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+
+  /* ---------- vista ---------- */
+  const view = { sim: null, m: null, cfg: null, frame: 0, playing: true, done: false, sum: null };
+  let job = null;
+
+  function currentMat() { return S.derive(st.p, st.T, st.RH); }
+
+  function run() {
+    if (job) job.cancel = true;
+    try { window.dispatchEvent(new Event('esponja:config')); } catch (e) { }
+    const m = currentMat();
+    const cfg = { mat: m, R: st.R / 100, H: st.H / 100, a: st.a / 100, depthFrac: st.depth / 100, base: st.base, nr: 16, nz: 20 };
+    const sim = S.createSim(cfg);
+    const j = { cancel: false };
+    job = j;
+    Object.assign(view, { sim, m, cfg, frame: 0, done: false, sum: null });
+    if (!st.zone) st.zone = { r: 0.5 * Math.min(1, st.a / st.R), z: 0.72, side: 1 };
+    $('run').disabled = true; $('run').textContent = 'Simulando…';
+    $('prog').style.width = '0%';
+    const pump = () => {
+      if (j.cancel) return;
+      const t0 = performance.now();
+      let fin = false;
+      while (performance.now() - t0 < 28) { if (sim.step()) { fin = true; break; } }
+      $('prog').style.width = (100 * sim.progress).toFixed(1) + '%';
+      view.frame = sim.frames.length - 1;
+      render();
+      if (fin) finish(j); else setTimeout(pump, 0);
+    };
+    setTimeout(pump, 20);
+  }
+
+  function finish(j) {
+    if (j.cancel) return;
+    job = null;
+    view.done = true;
+    view.sum = S.summarize(view.sim);
+    $('run').disabled = false; $('run').textContent = 'Simular';
+    $('prog').style.width = '0%';
+    const sc = $('scrub'); sc.max = String(view.sim.frames.length - 1);
+    view.frame = 0; view.playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!view.playing) view.frame = view.sim.frames.length - 1;
+    $('playBtn').textContent = view.playing ? 'Pausa' : 'Animar';
+    renderStats(); renderProps(); drawLegend(); render();
+  }
+
+  /* ---------- canvas ---------- */
+  function drawCanvas() {
+    const box = $('cbox'), cv = $('cv');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = box.clientWidth, h = box.clientHeight;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const sim = view.sim; if (!sim) return;
+    const ms = sim.mesh, fr = sim.frames[Math.min(view.frame, sim.frames.length - 1)], m = view.m;
+    const R = sim.R, H = sim.H;
+    const sc = Math.min(w / (2.75 * R), h / (1.62 * H));
+    const x0 = w / 2, yb = h - Math.max(26, 0.12 * H * sc);
+    const X = r => x0 + r * sc, Y = z => yb - z * sc;
+    view.tf = { x0, yb, sc };
+
+    // base
+    const bw = 1.3 * R;
+    ctx.fillStyle = C.line; ctx.fillRect(X(-bw), yb, 2 * bw * sc, 7);
+    ctx.strokeStyle = C.muted; ctx.lineWidth = 1;
+    if (sim.cfgBase === 'glued' || view.cfg.base === 'glued') {
+      ctx.beginPath();
+      for (let x = X(-bw) + 4; x < X(bw); x += 9) { ctx.moveTo(x, yb + 15); ctx.lineTo(x + 7, yb + 8); }
+      ctx.stroke();
+    } else {
+      for (let x = X(-R) + 6; x < X(R); x += Math.max(14, R * sc / 4)) { ctx.beginPath(); ctx.arc(x, yb + 11, 3.2, 0, Math.PI * 2); ctx.stroke(); }
+    }
+
+    // contorno original
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = C.muted; ctx.globalAlpha = 0.7;
+    ctx.strokeRect(X(-R), Y(H), 2 * R * sc, H * sc);
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+
+    // elementos deformados (ambas mitades)
+    const nnr = ms.nnr, u = fr.u;
+    const px = new Float64Array(8);
+    ctx.lineWidth = 0.6;
+    ctx.strokeStyle = '#3a2410';
+    for (let e = 0; e < ms.ne; e++) {
+      for (let k = 0; k < 4; k++) {
+        const n = ms.conn[4 * e + k];
+        px[2 * k] = ms.X[2 * n] + u[2 * n]; px[2 * k + 1] = ms.X[2 * n + 1] + u[2 * n + 1];
+      }
+      const col = foamColor(1 - fr.lmin[e], m);
+      ctx.fillStyle = 'rgb(' + col.map(v => Math.round(v)).join(',') + ')';
+      for (const sgn of [1, -1]) {
+        ctx.beginPath();
+        ctx.moveTo(X(sgn * px[0]), Y(px[1]));
+        for (let k = 1; k < 4; k++) ctx.lineTo(X(sgn * px[2 * k]), Y(px[2 * k + 1]));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.13; ctx.stroke(); ctx.globalAlpha = 1;
+      }
+    }
+    // elementos que se desgarrarían (estiramiento sobre el límite del material)
+    if (fr.lmax && m.lamBreak) {
+      ctx.strokeStyle = C.rupture; ctx.lineWidth = 1.6;
+      for (let e = 0; e < ms.ne; e++) {
+        if (!(fr.lmax[e] > m.lamBreak)) continue;
+        for (let k = 0; k < 4; k++) { const n = ms.conn[4 * e + k]; px[2 * k] = ms.X[2 * n] + u[2 * n]; px[2 * k + 1] = ms.X[2 * n + 1] + u[2 * n + 1]; }
+        for (const sgn of [1, -1]) { ctx.beginPath(); ctx.moveTo(X(sgn * px[0]), Y(px[1])); for (let k = 1; k < 4; k++) ctx.lineTo(X(sgn * px[2 * k]), Y(px[2 * k + 1])); ctx.closePath(); ctx.stroke(); }
+      }
+    }
+    // contorno deformado
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2; ctx.beginPath();
+    const outline = [];
+    for (let i = 0; i < nnr; i++) outline.push(ms.nn - nnr + i);
+    for (let j = ms.nnz - 1; j >= 0; j--) outline.push(j * nnr + nnr - 1);
+    for (const sgn of [1, -1]) {
+      outline.forEach((n, k) => { const xx = X(sgn * (ms.X[2 * n] + u[2 * n])), yy = Y(ms.X[2 * n + 1] + u[2 * n + 1]); if (k) ctx.lineTo(xx, yy); else ctx.moveTo(xx, yy); });
+    }
+    ctx.stroke();
+    // eje
+    ctx.setLineDash([6, 3, 1, 3]); ctx.strokeStyle = C.muted; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x0, Y(-0.05 * H)); ctx.lineTo(x0, Y(1.5 * H)); ctx.stroke(); ctx.setLineDash([]);
+
+    // punzón
+    const a = view.cfg.a >= 0.98 * R ? 1.12 * R : Math.min(view.cfg.a, 1.5 * R);
+    const zp = H - fr.d + (fr.phase === 'recuperación' ? 0.04 * H : 0);
+    ctx.fillStyle = C.punch;
+    const headH = Math.min(0.16 * H, 0.6 * a) * sc;
+    ctx.fillRect(X(-a), Y(zp) - headH, 2 * a * sc, headH);
+    const shaft = Math.max(a * 0.32, R * 0.08);
+    ctx.fillRect(X(-shaft), 0, 2 * shaft * sc, Y(zp) - headH + 1);
+
+    // zona de poros elegida (sigue al material)
+    const zn = zoneRef();
+    if (zn) {
+      const hw = zn.hw, pts = [];
+      const edge = (x0r, z0r, x1r, z1r) => { for (let k = 0; k <= 10; k++) { const q = fieldAt(fr, x0r + (x1r - x0r) * k / 10, z0r + (z1r - z0r) * k / 10); if (q) pts.push([X(q.x), Y(q.z)]); } };
+      const xa = zn.X - hw, xb = zn.X + hw, za = Math.max(0, zn.Z - hw), zb = Math.min(H, zn.Z + hw);
+      edge(xa, za, xb, za); edge(xb, za, xb, zb); edge(xb, zb, xa, zb); edge(xa, zb, xa, za);
+      if (pts.length > 2) {
+        ctx.beginPath(); pts.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = C.surface; ctx.stroke();
+        ctx.lineWidth = 1.6; ctx.strokeStyle = C.accent; ctx.stroke();
+      }
+    }
+
+    // lectura en vivo
+    ctx.fillStyle = C.ink; ctx.font = '500 12px "IBM Plex Mono", monospace';
+    ctx.fillText('F = ' + sig(fr.F, 3) + ' N', 10, 18);
+    ctx.fillStyle = C.muted;
+    ctx.fillText('hundimiento ' + nf(fr.d * 1000, 1) + ' mm', 10, 34);
+  }
+
+
+  /* ---------- campo local y vista de poros ---------- */
+  // devuelve posición deformada y gradiente F en un punto de referencia (X con signo: lado del corte)
+  function fieldAt(fr, Xs, Z) {
+    const sim = view.sim; if (!sim) return null;
+    const ms = sim.mesh, R = Math.abs(Xs), sgn = Xs < 0 ? -1 : 1;
+    if (R > sim.R * (1 + 1e-9) || Z < -1e-12 || Z > sim.H * (1 + 1e-9)) return null;
+    const rs = ms.rs, zs = ms.zs;
+    let i = 0, j = 0;
+    while (i < rs.length - 2 && rs[i + 1] < R) i++;
+    while (j < zs.length - 2 && zs[j + 1] < Z) j++;
+    const hr = rs[i + 1] - rs[i], hz = zs[j + 1] - zs[j];
+    const xi = 2 * (R - rs[i]) / hr - 1, et = 2 * (Z - zs[j]) / hz - 1;
+    const nnr = ms.nnr, n0 = j * nnr + i, nodes = [n0, n0 + 1, n0 + nnr + 1, n0 + nnr];
+    const XI = [-1, 1, 1, -1], ETA = [-1, -1, 1, 1];
+    let ur = 0, uz = 0, urR = 0, urZ = 0, uzR = 0, uzZ = 0;
+    for (let k = 0; k < 4; k++) {
+      const N = 0.25 * (1 + XI[k] * xi) * (1 + ETA[k] * et);
+      const dR = 0.25 * XI[k] * (1 + ETA[k] * et) * 2 / hr, dZ = 0.25 * ETA[k] * (1 + XI[k] * xi) * 2 / hz;
+      const vr = fr.u[2 * nodes[k]], vz = fr.u[2 * nodes[k] + 1];
+      ur += N * vr; uz += N * vz; urR += dR * vr; urZ += dZ * vr; uzR += dR * vz; uzZ += dZ * vz;
+    }
+    const e = j * (nnr - 1) + i;
+    const F33 = R > 1e-9 ? 1 + ur / R : 1 + urR;
+    // en el lado izquierdo del corte el campo es el espejo del derecho
+    return { x: sgn * (R + ur), z: Z + uz, F11: 1 + urR, F12: sgn * urZ, F21: sgn * uzR, F22: 1 + uzZ, F33, e, p: fr.p[e], lmin: fr.lmin[e] };
+  }
+  function stretches(q) {
+    // estiramientos principales en el plano del corte, más el circunferencial
+    const c11 = q.F11 * q.F11 + q.F21 * q.F21, c22 = q.F12 * q.F12 + q.F22 * q.F22, c12 = q.F11 * q.F12 + q.F21 * q.F22;
+    const mean = (c11 + c22) / 2, d = Math.sqrt(((c11 - c22) / 2) ** 2 + c12 * c12);
+    return { l1: Math.sqrt(mean + d), l2: Math.sqrt(Math.max(mean - d, 1e-12)), lv: Math.hypot(q.F12, q.F22), lh: Math.hypot(q.F11, q.F21), lt: q.F33 };
+  }
+  function hash(i, j, k) {
+    let h = (i * 374761393 + j * 668265263 + k * 2147483647) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  }
+  function zoneRef() {
+    const sim = view.sim; if (!sim || !st.zone) return null;
+    const m = view.m, d = st.p.poreD / 1000 * m.scale;
+    const hw = st.zoneN * d / 2;
+    const Z = Math.min(Math.max(st.zone.z * sim.H, 0), sim.H), Xa = Math.min(Math.max(st.zone.r * sim.R, 0), sim.R);
+    return { X: st.zone.side * Xa, Z, hw, d };
+  }
+  function poresOf(zn) {
+    // red hexagonal fija en el material, con tamaños, posiciones y umbrales propios
+    const s = zn.d, rowH = s * Math.sqrt(3) / 2, out = [];
+    const j0 = Math.floor((zn.Z - zn.hw) / rowH) - 1, j1 = Math.ceil((zn.Z + zn.hw) / rowH) + 1;
+    for (let j = j0; j <= j1; j++) {
+      const off = (j & 1) ? s / 2 : 0;
+      const i0 = Math.floor((zn.X - zn.hw - off) / s) - 1, i1 = Math.ceil((zn.X + zn.hw - off) / s) + 1;
+      for (let i = i0; i <= i1; i++) {
+        const X = i * s + off + (hash(i, j, 1) - 0.5) * 0.18 * s, Z = j * rowH + (hash(i, j, 2) - 0.5) * 0.18 * s;
+        if (Math.abs(X - zn.X) > zn.hw || Math.abs(Z - zn.Z) > zn.hw) continue;
+        out.push({ i, j, X, Z, size: 0.82 + 0.36 * hash(i, j, 3), thr: 0.6 + 0.8 * hash(i, j, 4), ph: 6.283 * hash(i, j, 5), lobes: 4 + Math.floor(3 * hash(i, j, 6)) });
+      }
+    }
+    return out;
+  }
+  function poreState(q, pore, m) {
+    const sv = stretches(q), comp = 1 - Math.min(sv.l2, sv.lt);
+    const thr = Math.max(m.epsY, 0.005) * pore.thr;
+    const buckle = Math.max(0, Math.min(1, (comp - thr) / 0.18));
+    const st2 = comp >= m.epsOn ? 'densificado' : comp > thr ? 'pandeado' : 'elástico';
+    return { sv, comp, thr, buckle, state: st2 };
+  }
+
+  function drawMicro() {
+    const box = $('mbox'), cv = $('mcv');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = box.clientWidth, h = box.clientHeight;
+    if (!w) return;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, w, h);
+    const sim = view.sim, zn = zoneRef();
+    if (!sim || !zn) return;
+    const fr = sim.frames[Math.min(view.frame, sim.frames.length - 1)], m = view.m;
+    const qc = fieldAt(fr, zn.X, zn.Z); if (!qc) return;
+    const sc = Math.min(w, h) / (2 * zn.hw * 1.22);
+    const cx = w / 2, cy = h / 2;
+    const MX = x => cx + (x - qc.x) * sc, MY = z => cy - (z - qc.z) * sc;
+    const pores = poresOf(zn);
+    const wall = Math.sqrt(m.phi / 1.06);            // grosor relativo de pared (Gibson–Ashby)
+    const rp0 = 0.5 * zn.d * Math.max(0.35, 1 - 1.15 * wall);
+    view.micro = { pores: [], MX, MY };
+    const VOID = '#24170c';
+    // celdas (paredes) primero, luego los huecos
+    const drawn = [];
+    for (const pr of pores) {
+      const q = fieldAt(fr, pr.X, pr.Z); if (!q) continue;
+      const ps = poreState(q, pr, m);
+      drawn.push({ pr, q, ps });
+    }
+    const map = (q, dx, dz) => [MX(q.x + q.F11 * dx + q.F12 * dz), MY(q.z + q.F21 * dx + q.F22 * dz)];
+    const rc = zn.d / Math.sqrt(3) * 1.04;
+    for (const o of drawn) {
+      const col = foamColor(o.ps.comp, m);
+      ctx.fillStyle = 'rgb(' + col.map(v => Math.round(v)).join(',') + ')';
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) { const a = Math.PI / 3 * k + Math.PI / 6; const p = map(o.q, rc * Math.cos(a), rc * Math.sin(a)); k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+      ctx.closePath(); ctx.fill();
+    }
+    for (const o of drawn) {
+      const { pr, q, ps } = o;
+      const r0 = rp0 * pr.size, amp = 0.14 * ps.buckle;
+      ctx.beginPath();
+      const pts = [];
+      for (let k = 0; k <= 40; k++) {
+        const a = 2 * Math.PI * k / 40;
+        const rr = r0 * (1 + amp * Math.sin(pr.lobes * a + pr.ph) - 0.5 * amp * Math.abs(Math.sin(a)));
+        const p = map(q, rr * Math.cos(a), rr * Math.sin(a));
+        pts.push(p); k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]);
+      }
+      ctx.closePath(); ctx.fillStyle = VOID; ctx.fill();
+      view.micro.pores.push({ pr, q, ps, x: MX(q.x), y: MY(q.z) });
+      if (view.selPore && view.selPore.i === pr.i && view.selPore.j === pr.j) {
+        ctx.lineWidth = 2.5; ctx.strokeStyle = C.surface; ctx.stroke();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = C.accent; ctx.stroke();
+      }
+    }
+    // punzón y base, si caen dentro de la vista
+    const zp = sim.H - fr.d + (fr.phase === 'recuperación' ? 0.04 * sim.H : 0);
+    const aP = view.cfg.a >= 0.98 * sim.R ? 1.12 * sim.R : view.cfg.a;
+    ctx.fillStyle = C.punch;
+    const pyTop = MY(zp);
+    if (pyTop > 0) { const xl = Math.max(0, MX(-aP)), xr = Math.min(w, MX(aP)); if (xr > xl) ctx.fillRect(xl, 0, xr - xl, Math.min(h, pyTop)); }
+    const by = MY(0);
+    if (by < h) { ctx.fillStyle = C.line; ctx.fillRect(0, by, w, h - by); }
+    // escala
+    const barM = zn.d * 2, barPx = barM * sc;
+    ctx.fillStyle = C.ink; ctx.fillRect(12, h - 16, barPx, 3);
+    ctx.font = '500 11px "IBM Plex Mono", monospace';
+    ctx.fillText(nf(barM * 1000, 2) + ' mm', 12, h - 22);
+    renderMicroRead(qc, drawn, m);
+  }
+
+  function fr0() { return view.sim.frames[Math.min(view.frame, view.sim.frames.length - 1)]; }
+  function renderMicroRead(qc, drawn, m) {
+    const zn = zoneRef();
+    const sv = stretches(qc);
+    $('microPos').textContent = 'r ' + nf(Math.abs(zn.X) * 1000, 1) + ' mm · z ' + nf(zn.Z * 1000, 1) + ' mm';
+    const cnt = { 'elástico': 0, 'pandeado': 0, 'densificado': 0 };
+    drawn.forEach(o => cnt[o.ps.state]++);
+    const pct = v => (v >= 0 ? '+' : '') + nf(100 * v, 1) + ' %';
+    const sz = fr0().sz[qc.e];
+    const pm = qc.p;
+    const items = [
+      ['Alto', pct(sv.lv - 1)],
+      ['Ancho radial', pct(sv.lh - 1)],
+      ['Ancho en giro', pct(sv.lt - 1)],
+      ['Carga vertical', sig(-sz / 1000, 3) + ' kPa' + (sz > 0 ? ' (tira)' : '')],
+      ['Presión media', sig(pm / 1000, 3) + ' kPa' + (pm < 0 ? ' (tracción)' : '')],
+      ['Volumen', pct(sv.l1 * sv.l2 * sv.lt - 1)]
+    ];
+    $('microRead').innerHTML = items.map(([l, v]) => `<div class="prop"><span class="label">${l}</span><span class="v">${v}</span></div>`).join('') +
+      `<div class="prop wide"><span class="label">Poros en la zona</span><span class="v">${cnt['elástico']} elásticos · ${cnt['pandeado']} pandeados · ${cnt['densificado']} densificados</span></div>`;
+    const sp = view.selPore && view.micro.pores.find(o => o.pr.i === view.selPore.i && o.pr.j === view.selPore.j);
+    $('poreInfo').textContent = sp
+      ? `Poro elegido: ${sp.ps.state}. Alto ${pct(sp.ps.sv.lv - 1)}, ancho ${pct(sp.ps.sv.lh - 1)}, carga vertical ${sig(-fr0().sz[sp.q.e] / 1000, 3)} kPa. Sus paredes pandean desde ${nf(100 * sp.ps.thr, 1)} % de compresión; mide ${nf(sp.pr.size * 100, 0)} % del poro promedio.`
+      : 'Toca un poro para ver su estado.';
+  }
+
+  // del canvas principal a coordenadas de referencia del material
+  function pickMain(px, py) {
+    const sim = view.sim, tf = view.tf; if (!sim || !tf) return null;
+    const fr = sim.frames[Math.min(view.frame, sim.frames.length - 1)], ms = sim.mesh;
+    const side = px < tf.x0 ? -1 : 1;
+    const x = Math.abs((px - tf.x0) / tf.sc), z = (tf.yb - py) / tf.sc;
+    const nnr = ms.nnr;
+    for (let e = 0; e < ms.ne; e++) {
+      const nd = [0, 1, 2, 3].map(k => ms.conn[4 * e + k]);
+      const P = nd.map(n => [ms.X[2 * n] + fr.u[2 * n], ms.X[2 * n + 1] + fr.u[2 * n + 1]]);
+      let inside = true;
+      for (let k = 0; k < 4; k++) {
+        const a = P[k], b = P[(k + 1) % 4];
+        if ((b[0] - a[0]) * (z - a[1]) - (b[1] - a[1]) * (x - a[0]) < -1e-12) { inside = false; break; }
+      }
+      if (!inside) continue;
+      // inversa bilineal por Newton
+      let xi = 0, et = 0;
+      const XI = [-1, 1, 1, -1], ETA = [-1, -1, 1, 1];
+      for (let it = 0; it < 12; it++) {
+        let fx = -x, fz = -z, a11 = 0, a12 = 0, a21 = 0, a22 = 0;
+        for (let k = 0; k < 4; k++) {
+          const N = 0.25 * (1 + XI[k] * xi) * (1 + ETA[k] * et);
+          const dx = 0.25 * XI[k] * (1 + ETA[k] * et), de = 0.25 * ETA[k] * (1 + XI[k] * xi);
+          fx += N * P[k][0]; fz += N * P[k][1]; a11 += dx * P[k][0]; a12 += de * P[k][0]; a21 += dx * P[k][1]; a22 += de * P[k][1];
+        }
+        const det = a11 * a22 - a12 * a21; if (Math.abs(det) < 1e-30) break;
+        xi -= (a22 * fx - a12 * fz) / det; et -= (-a21 * fx + a11 * fz) / det;
+      }
+      const n0 = nd[0], n2 = nd[2];
+      const R = ms.X[2 * n0] + (xi + 1) / 2 * (ms.X[2 * n2] - ms.X[2 * n0]);
+      const Z = ms.X[2 * n0 + 1] + (et + 1) / 2 * (ms.X[2 * n2 + 1] - ms.X[2 * n0 + 1]);
+      return { r: Math.min(Math.max(R / sim.R, 0), 1), z: Math.min(Math.max(Z / sim.H, 0), 1), side };
+    }
+    return null;
+  }
+
+  /* ---------- gráficos SVG ---------- */
+  function niceTicks(lo, hi, n) {
+    const span = hi - lo || 1, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map(s => s * mag).find(s => span / s <= n) || 10 * mag;
+    const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9 * span; v += step) out.push(+v.toPrecision(10));
+    return out;
+  }
+  const PAD = { l: 46, r: 14, t: 10, b: 34 }, VW = 420, VH = 250;
+  function frameSvg(xt, yt, X, Y, xl, yl, xfmt, yfmt) {
+    let s = '';
+    for (const v of yt) s += `<line class="grid" x1="${PAD.l}" x2="${VW - PAD.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${PAD.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${yfmt(v)}</text>`;
+    for (const v of xt) s += `<line class="grid" y1="${PAD.t}" y2="${VH - PAD.b}" x1="${X(v)}" x2="${X(v)}"/><text x="${X(v)}" y="${VH - PAD.b + 14}" text-anchor="middle">${xfmt(v)}</text>`;
+    s += `<line class="axis" x1="${PAD.l}" x2="${VW - PAD.r}" y1="${VH - PAD.b}" y2="${VH - PAD.b}"/>`;
+    s += `<text x="${(PAD.l + VW - PAD.r) / 2}" y="${VH - 4}" text-anchor="middle">${xl}</text>`;
+    s += `<text x="12" y="${(PAD.t + VH - PAD.b) / 2}" text-anchor="middle" transform="rotate(-90 12 ${(PAD.t + VH - PAD.b) / 2})">${yl}</text>`;
+    return s;
+  }
+  function pathOf(pts) { return pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''); }
+
+  function drawCharts() {
+    const sim = view.sim; if (!sim) return;
+    const fr = sim.frames, cur = fr[Math.min(view.frame, fr.length - 1)];
+    // 1) fuerza vs hundimiento
+    const dMax = Math.max(...fr.map(f => f.d)) * 1000 || 1, fMax = Math.max(...fr.map(f => f.F)) || 1;
+    const xt = niceTicks(0, dMax * 1.04, 5), yt = niceTicks(0, fMax * 1.1, 5);
+    const xm = Math.max(xt[xt.length - 1], dMax * 1.04), ym = Math.max(yt[yt.length - 1], fMax * 1.1);
+    const X = v => PAD.l + (VW - PAD.l - PAD.r) * v / xm, Y = v => VH - PAD.b - (VH - PAD.t - PAD.b) * v / ym;
+    const ld = fr.filter(f => f.phase === 'inicio' || f.phase === 'carga');
+    const lastL = ld[ld.length - 1];
+    const ul = [lastL].concat(fr.filter(f => f.phase === 'descarga'));
+    const P1 = ld.map(f => [X(f.d * 1000), Y(f.F)]), P2 = ul.map(f => [X(f.d * 1000), Y(f.F)]);
+    let s = frameSvg(xt, yt, X, Y, 'hundimiento (mm)', 'fuerza (N)', v => nf(v, 1), v => sig(v, 3));
+    if (view.done && P2.length > 1) s += `<path d="${pathOf(P1.concat(P2.slice().reverse()))}Z" fill="${C.load}" opacity="0.13"/>`;
+    s += `<path d="${pathOf(P1)}" fill="none" stroke="${C.load}" stroke-width="2.2" stroke-linejoin="round"/>`;
+    if (P2.length > 1) s += `<path d="${pathOf(P2)}" fill="none" stroke="${C.unload}" stroke-width="2.2" stroke-linejoin="round"/>`;
+    if (cur.phase !== 'recuperación') s += `<circle cx="${X(cur.d * 1000)}" cy="${Y(cur.F)}" r="4.5" fill="${C.surface}" stroke="${C.ink}" stroke-width="1.6"/>`;
+    $('ch1').innerHTML = s;
+
+    // 2) recuperación tras soltar
+    const iRel = fr.reduce((acc, f, i) => (f.phase === 'descarga' ? i : acc), -1);
+    let s2 = '';
+    if (iRel < 0) {
+      s2 = frameSvg([], [], v => 0, v => 0, 'tiempo desde que se retira el punzón (s, log)', 'altura (% de H)', String, String) + `<text x="${VW / 2}" y="${VH / 2}" text-anchor="middle">Aparece al terminar la descarga</text>`;
+      $('ch2').innerHTML = s2; return;
+    }
+    const tRel = fr[iRel].t;
+    const pts = fr.slice(iRel).map((f, k) => ({ x: k === 0 ? null : f.t - tRel, y: 100 * f.h / sim.H, i: iRel + k }));
+    const firstDt = pts.length > 1 ? pts[1].x : 1;
+    pts[0].x = firstDt / 2;
+    const xLo = Math.log10(pts[0].x), xHi = Math.log10(Math.max(pts[pts.length - 1].x, pts[0].x * 10));
+    const yMin = Math.min(...pts.map(p => p.y)), span = Math.max(100.3 - yMin, 0.5);
+    const yLo = Math.max(0, 100 - span * 1.15), yHi = 100 + span * 0.08;
+    const X2 = v => PAD.l + (VW - PAD.l - PAD.r) * (Math.log10(v) - xLo) / (xHi - xLo);
+    const Y2 = v => VH - PAD.b - (VH - PAD.t - PAD.b) * (v - yLo) / (yHi - yLo);
+    const dec = []; for (let d = Math.ceil(xLo); d <= Math.floor(xHi); d++) dec.push(Math.pow(10, d));
+    const xt2 = dec.length >= 2 ? dec : [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000].filter(v => Math.log10(v) >= xLo && Math.log10(v) <= xHi);
+    s2 = frameSvg(xt2, niceTicks(yLo, yHi, 5), X2, Y2, 'tiempo desde que se retira el punzón (s, escala log)', 'altura (% de H)', v => sig(v, 2), v => nf(v, 2));
+    s2 += `<line x1="${PAD.l}" x2="${VW - PAD.r}" y1="${Y2(100)}" y2="${Y2(100)}" stroke="${C.ink}" stroke-dasharray="4 4" opacity="0.6"/><text x="${VW - PAD.r - 2}" y="${Y2(100) - 5}" text-anchor="end">altura original</text>`;
+    s2 += `<path d="${pathOf(pts.map(p => [X2(p.x), Y2(p.y)]))}" fill="none" stroke="${C.ink}" stroke-width="2.2" stroke-linejoin="round"/>`;
+    const cp = pts.find(p => p.i === view.frame);
+    if (cp) s2 += `<circle cx="${X2(cp.x)}" cy="${Y2(cp.y)}" r="4.5" fill="${C.surface}" stroke="${C.ink}" stroke-width="1.6"/>`;
+    $('ch2').innerHTML = s2;
+  }
+
+  function drawLegend() {
+    const m = view.m || currentMat();
+    const host = $('legTicks');
+    const W = 220, stops = [0, Math.max(m.epsY, 0.005), m.epsOn, m.epsL];
+    const pos = [0, 0.3, 0.7, 1];
+    const g = stops.map((sv, i) => `<stop offset="${pos[i]}" stop-color="${C['foam' + i]}"/>`).join('');
+    host.innerHTML = `<svg viewBox="0 0 ${W} 30" width="${W}" height="30" style="max-width:100%;display:block" aria-hidden="true"><defs><linearGradient id="lg" x1="0" x2="1">${g}</linearGradient></defs><rect x="0" y="2" width="${W}" height="10" rx="2" fill="url(#lg)"/>` +
+      stops.map((sv, i) => `<text x="${Math.min(W - 2, Math.max(2, pos[i] * W))}" y="26" text-anchor="${i === 0 ? 'start' : i === 3 ? 'end' : 'middle'}">${nf(sv * 100, 0)} %</text>`).join('') + '</svg>';
+    $('legText').textContent = 'elástico · celdas pandeadas · densificado';
+  }
+
+  /* ---------- paneles de resultados ---------- */
+  function renderStats() {
+    const sim = view.sim, s = view.sum, m = view.m;
+    if (!sim || !s) return;
+    const aEff = Math.min(view.cfg.a, sim.R);
+    const pMean = s.Fmax / (Math.PI * aEff * aEff);
+    const fr = sim.frames, last = fr[fr.length - 1];
+    const maxSag = (sim.H - Math.min(...fr.map(f => f.h))) / sim.H;
+    const recFrac = maxSag > 0 ? 1 - Math.max(0, s.setEnd) / maxSag : 1;
+    const items = [
+      ['Fuerza máxima', sig(s.Fmax, 3) + ' N', 'presión media bajo el punzón ' + sig(pMean / 1000, 3) + ' kPa'],
+      ['Energía disipada', nf(100 * s.loss, 0) + ' %', 'del trabajo de carga (' + sig(s.Wl * 1000, 3) + ' mJ)'],
+      ['Hundida al retirar', nf(100 * Math.max(0, s.setAfterUnload), 2) + ' %', 'de la altura, ' + nf(1000 * sim.H * Math.max(0, s.setAfterUnload), 2) + ' mm'],
+      ['Tras ' + fmtTime(last.t - (fr.filter(f => f.phase === 'descarga').pop() || last).t), nf(100 * Math.max(0, s.setEnd), 2) + ' %', 'recuperó el ' + nf(100 * Math.min(1, recFrac), 1) + ' % del hundimiento']
+    ];
+    $('stats').innerHTML = items.map(([l, v, sub]) => `<div class="stat"><span class="label">${l}</span><span class="v">${v}</span><span class="s">${sub}</span></div>`).join('');
+  }
+  function fmtTime(t) {
+    if (t < 90) return nf(t, 0) + ' s';
+    if (t < 5400) return nf(t / 60, 0) + ' min';
+    return nf(t / 3600, 1) + ' h';
+  }
+
+  function renderProps() {
+    const m = currentMat();
+    const Hc = st.H * m.scale;
+    const hCapCm = m.hCap * 100;
+    const items = [
+      ['Rigidez de la espuma E*', sig(m.E / 1000, 3) + ' kPa'],
+      ['Tensión de meseta', sig(m.sigPl / 1000, 3) + ' kPa'],
+      ['Fracción de sólido φ', nf(100 * m.phi, 2) + ' %'],
+      ['Densifica desde', nf(100 * m.epsOn, 0) + ' %'],
+      ['Humedad del sólido', nf(100 * m.M, 1) + ' %'],
+      ['Tg efectiva', nf(m.Tg, 0) + ' °C'],
+      ['Módulo del sólido', sig(m.Es / 1e6, 3) + ' MPa'],
+      ['Tiempos τ₁ · τ₂', sig(m.tau1, 2) + ' · ' + sig(m.tau2, 2) + ' s'],
+      ['Cambio de tamaño', (m.scale >= 1 ? '+' : '') + nf(100 * (m.scale - 1), 2) + ' %'],
+      ['Agua capilar si se mojara', hCapCm > 0 ? sig(hCapCm, 2) + ' cm' : 'no retiene']
+    ];
+    $('propGrid').innerHTML = items.map(([l, v]) => `<div class="prop"><span class="label">${l}</span><span class="v">${v}</span></div>`).join('');
+
+    const chips = [];
+    const state = m.gf > 0.7 ? ['Sólido vítreo', 'warn'] : m.gf > 0.3 ? ['Sólido en transición vítrea', ''] : ['Sólido gomoso', 'ok'];
+    chips.push(state);
+    chips.push(m.plastic ? ['Colapso plástico de celdas', 'warn'] : ['Celdas pandean y recuperan', 'ok']);
+    const cont = st.a * 10 >= 5 * st.p.poreD;
+    chips.push(cont ? ['Punzón ≥ 5 poros: medio continuo', 'ok'] : ['Punzón menor que 5 poros', 'warn']);
+    if (st.a >= 0.98 * st.R) chips.push(['El punzón cubre toda la cara', '']);
+    $('chips').innerHTML = chips.map(([t, c]) => `<span class="chip ${c}">${t}</span>`).join('');
+
+    const notes = [];
+    if (m.plastic) notes.push('Con este sólido las celdas fluirían en vez de pandear. Una esponja real quedaría marcada; el modelo la trata como recuperable, así que la recuperación mostrada es optimista.');
+    if (m.gf > 0.7 && !m.plastic) notes.push('El sólido está vítreo: rígido y frágil. Las celdas aún pandean elásticamente por ser delgadas, pero con hundimientos grandes podrían romperse.');
+    if (!cont) notes.push('El punzón abarca menos de 5 poros. A esa escala la esponja deja de comportarse como un material continuo y los resultados son sólo orientativos.');
+    if (hCapCm > 0) notes.push(hCapCm >= Hc ? `Si se mojara, la capilaridad sostendría ${sig(hCapCm, 2)} cm de agua: el cilindro de ${nf(Hc, 1)} cm quedaría lleno.` : `Si se mojara, la capilaridad sostendría ${sig(hCapCm, 2)} cm de agua: el cilindro de ${nf(Hc, 1)} cm drenaría por arriba y quedaría mojado sólo abajo.`);
+    const sim = view.sim;
+    if (sim && view.done) {
+      const lb = view.m.lamBreak; let fi = -1, mx = 1;
+      sim.frames.forEach((f, i) => { if (!f.lmax) return; for (const v of f.lmax) { if (v > mx) mx = v; if (fi < 0 && v > lb) fi = i; } });
+      if (fi >= 0) notes.push(`Ruptura: a ${nf(sim.frames[fi].d * 1000, 1)} mm de hundimiento las paredes junto al borde del punzón se estiran más de ${nf(100 * (lb - 1), 0)} %, el límite de este material, y se desgarrarían (marcadas en rojo en el corte). Este cálculo 2D sigue como si no se rompiera; en la vista 3D la zona rota sí se separa.`);
+    }
+    if (sim && view.done && sim.truncated) notes.push(`El borde del punzón cizalló la esponja al límite a ${nf(sim.truncated.d * 1000, 1)} mm (${nf(100 * sim.truncated.d / sim.H, 0)} % de la altura). Una esponja real probablemente se desgarraría ahí; la simulación descargó desde ese punto.`);
+    if (sim && view.done && sim.stopped !== null) notes.push('La recuperación se detuvo antes del final de la ventana de tiempo porque el cálculo dejó de converger; se muestra hasta ese punto.');
+    if (sim && view.done && !sim.ok) notes.push('La simulación no convergió y se muestra hasta el último paso calculado. Prueba con un punzón más grande o menos hundimiento.');
+    $('notes').innerHTML = notes.map(t => `<p>${t}</p>`).join('');
+  }
+
+  function render() {
+    if (!view.sim) return;
+    drawCanvas(); drawMicro(); drawCharts();
+    const fr = view.sim.frames[Math.min(view.frame, view.sim.frames.length - 1)];
+    const ph = { inicio: 'reposo', carga: 'cargando', descarga: 'retirando el punzón', 'recuperación': 'recuperándose sola' }[fr.phase];
+    $('phaseLbl').textContent = view.done ? ph : 'calculando · ' + ph;
+    $('tLbl').textContent = 't = ' + fmtTime(fr.t);
+    $('scrub').value = String(view.frame);
+  }
+
+  /* ---------- reproducción ---------- */
+  let lastTick = 0, hold = 0;
+  function tick(ts) {
+    if (view.done && view.playing && view.sim) {
+      if (ts - lastTick > 85) {
+        lastTick = ts;
+        const n = view.sim.frames.length;
+        if (view.frame >= n - 1) { if (++hold > 18) { hold = 0; view.frame = 0; } }
+        else view.frame++;
+        render();
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- controles ---------- */
+  function syncOutputs() {
+    const R = st.R;
+    const pa = $('punchA');
+    pa.max = String(Math.max(0.5, +(R * 1.2).toFixed(2)));
+    if (st.a > +pa.max) st.a = +pa.max;
+    pa.value = String(st.a);
+    $('punchAOut').textContent = st.a >= 0.98 * R ? 'cubre toda la cara' : nf(st.a, 2) + ' cm';
+    $('depth').value = String(st.depth);
+    $('depthOut').textContent = st.depth + ' % · ' + nf(st.H * st.depth / 10, 1) + ' mm';
+    $('temp').value = String(st.T); $('tempOut').textContent = st.T + ' °C';
+    $('rh').value = String(st.RH); $('rhOut').textContent = st.RH + ' %';
+    $('cylR').value = String(st.R); $('cylH').value = String(st.H);
+    $('nuR').value = String(st.p.nu); $('nuOut').textContent = nf(st.p.nu, 2) + (st.p.nu < 0.005 ? ' · sin ensanche' : ' · +' + nf(100 * (Math.pow(1 - st.depth / 100, -st.p.nu) - 1), 0) + ' % de ancho al ' + st.depth + ' %');
+    $('zoneN').value = String(st.zoneN); $('zoneNOut').textContent = st.zoneN + ' · ' + nf(st.zoneN * st.p.poreD, 1) + ' mm';
+    $('baseGlued').setAttribute('aria-pressed', String(st.base === 'glued'));
+    $('baseFree').setAttribute('aria-pressed', String(st.base === 'free'));
+    const sel = $('preset');
+    sel.innerHTML = Object.keys(PRE).map(k => `<option value="${k}">${PRE[k].name}</option>`).join('') + (st.custom ? `<option value="custom">Personalizado (basado en ${PRE[st.baseKey].name.split(' (')[0]})</option>` : '');
+    sel.value = st.custom ? 'custom' : st.key;
+  }
+
+  let runTimer = 0;
+  function scheduleRun(ms = 250) { clearTimeout(runTimer); runTimer = setTimeout(run, ms); }
+
+  function bind() {
+    $('preset').addEventListener('change', e => {
+      const v = e.target.value; if (v === 'custom') return;
+      st.key = v; st.baseKey = v; st.custom = false; st.p = Object.assign({}, PRE[v]);
+      syncOutputs(); buildFicha(); renderProps(); save(); scheduleRun(50);
+    });
+    const num = (id, key, lo, hi) => $(id).addEventListener('change', e => {
+      let v = parseFloat(String(e.target.value).replace(',', '.'));
+      if (!isFinite(v)) v = st[key];
+      st[key] = Math.min(hi, Math.max(lo, v));
+      syncOutputs(); renderProps(); save(); scheduleRun();
+    });
+    num('cylR', 'R', 0.5, 10); num('cylH', 'H', 0.5, 20);
+    const slider = (id, key) => {
+      $(id).addEventListener('input', e => { st[key] = +e.target.value; syncOutputs(); renderProps(); });
+      $(id).addEventListener('change', () => { save(); scheduleRun(); });
+    };
+    slider('punchA', 'a'); slider('depth', 'depth'); slider('temp', 'T'); slider('rh', 'RH');
+    $('baseGlued').addEventListener('click', () => { st.base = 'glued'; syncOutputs(); save(); scheduleRun(50); });
+    $('baseFree').addEventListener('click', () => { st.base = 'free'; syncOutputs(); save(); scheduleRun(50); });
+    $('run').addEventListener('click', () => run());
+    $('playBtn').addEventListener('click', () => {
+      view.playing = !view.playing; $('playBtn').textContent = view.playing ? 'Pausa' : 'Animar';
+      if (view.playing && view.sim && view.frame >= view.sim.frames.length - 1) view.frame = 0;
+    });
+    $('scrub').addEventListener('input', e => { view.playing = false; $('playBtn').textContent = 'Animar'; view.frame = +e.target.value; render(); });
+    $('resetBtn').addEventListener('click', () => {
+      st.key = st.baseKey; st.custom = false; st.p = Object.assign({}, PRE[st.baseKey]);
+      syncOutputs(); buildFicha(); renderProps(); save(); toast('Material restaurado.'); scheduleRun(50);
+    });
+    $('copyBtn').addEventListener('click', () => {
+      const txt = JSON.stringify(Object.assign({ nombre: st.custom ? 'Personalizado' : PRE[st.key].name, base: st.baseKey }, st.p), null, 1);
+      const ta = $('fichaIn');
+      const fallback = () => { ta.value = txt; ta.focus(); ta.select(); toast('La ficha quedó seleccionada en el cuadro de abajo; cópiala con Ctrl+C.'); };
+      try { navigator.clipboard.writeText(txt).then(() => toast('Ficha copiada.'), fallback); } catch (e) { fallback(); }
+    });
+    $('loadBtn').addEventListener('click', () => {
+      let o;
+      try { o = JSON.parse($('fichaIn').value); } catch (e) { toast('No se pudo leer: el texto no es JSON válido.'); return; }
+      const base = PRE[o.base] ? o.base : 'pu';
+      const p = Object.assign({}, PRE[base]);
+      let n = 0;
+      for (const d of DEFS) if (isFinite(+o[d.k]) && o[d.k] !== '' && o[d.k] !== null) { p[d.k] = +o[d.k]; n++; }
+      if (!n) { toast('No encontré parámetros conocidos en ese texto.'); return; }
+      st.p = p; st.baseKey = base; st.custom = true;
+      syncOutputs(); buildFicha(); renderProps(); save(); toast('Ficha cargada: ' + n + ' parámetros.'); scheduleRun(50);
+    });
+    new ResizeObserver(() => { if (view.sim) drawCanvas(); }).observe($('cbox'));
+    new ResizeObserver(() => { if (view.sim) drawMicro(); }).observe($('mbox'));
+    $('nuR').addEventListener('input', e => {
+      st.p.nu = +e.target.value; st.custom = true;
+      const f = $('p_nu'); if (f) f.value = String(st.p.nu);
+      syncOutputs();
+    });
+    $('nuR').addEventListener('change', () => { syncOutputs(); renderProps(); save(); scheduleRun(); });
+    $('zoneN').addEventListener('input', e => { st.zoneN = +e.target.value; syncOutputs(); save(); if (view.sim) { drawCanvas(); drawMicro(); } });
+    const pickAt = ev => {
+      const r = $('cv').getBoundingClientRect();
+      const z = pickMain(ev.clientX - r.left, ev.clientY - r.top);
+      if (!z) return;
+      st.zone = z; view.selPore = null; save();
+      drawCanvas(); drawMicro();
+    };
+    $('cv').addEventListener('click', pickAt);
+    $('cv').addEventListener('keydown', ev => {
+      if (!st.zone) return;
+      const step = 0.03, k = ev.key;
+      if (k === 'ArrowLeft') st.zone.r = Math.max(0, st.zone.r - step * st.zone.side);
+      else if (k === 'ArrowRight') st.zone.r = Math.min(1, st.zone.r + step * st.zone.side);
+      else if (k === 'ArrowUp') st.zone.z = Math.min(1, st.zone.z + step);
+      else if (k === 'ArrowDown') st.zone.z = Math.max(0, st.zone.z - step);
+      else return;
+      ev.preventDefault(); st.zone.r = Math.max(0, st.zone.r); save(); drawCanvas(); drawMicro();
+    });
+    $('mcv').addEventListener('click', ev => {
+      if (!view.micro) return;
+      const r = $('mcv').getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+      let best = null, bd = Infinity;
+      for (const o of view.micro.pores) { const d = (o.x - x) ** 2 + (o.y - y) ** 2; if (d < bd) { bd = d; best = o; } }
+      view.selPore = best ? { i: best.pr.i, j: best.pr.j } : null;
+      drawMicro();
+    });
+    const retheme = () => { readColors(); drawLegend(); render(); try { window.dispatchEvent(new Event('esponja:theme')); } catch (e) { } };
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
+    new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+
+  let toastT = 0;
+  function toast(t) { $('toast').textContent = t; clearTimeout(toastT); toastT = setTimeout(() => { $('toast').textContent = ''; }, 4000); }
+
+  function buildFicha() {
+    const m = currentMat();
+    const autoV = { epsL: m.epsL, epsOn: m.epsOn };
+    $('pgroups').innerHTML = GROUPS.map(g => `<div class="panel pgroup"><h3>${g.t}</h3><p>${g.d}</p>` +
+      DEFS.filter(d => d.g === g.id).map(d => {
+        const v = st.p[d.k] * (d.sc || 1);
+        const val = d.auto && !(st.p[d.k] > 0) ? '' : String(+v.toPrecision(6));
+        const ph = d.auto ? 'auto ' + nf(autoV[d.k], 2) : '';
+        return `<div class="prow"><label class="nm" for="p_${d.k}">${d.l}${d.u ? `<span class="u">${d.u}</span>` : ''}</label><input type="number" step="any" id="p_${d.k}" data-k="${d.k}" value="${val}" placeholder="${ph}"><p class="ex">${d.ex}</p></div>`;
+      }).join('') + '</div>').join('');
+    $('pgroups').querySelectorAll('input').forEach(inp => inp.addEventListener('change', e => {
+      const d = DEFS.find(x => x.k === e.target.dataset.k);
+      const raw = String(e.target.value).replace(',', '.').trim();
+      let v = raw === '' && d.auto ? 0 : parseFloat(raw);
+      if (!isFinite(v)) { e.target.value = String(st.p[d.k] * (d.sc || 1)); return; }
+      v = v / (d.sc || 1);
+      if (d.k !== 'Tg0' && v < 0) v = 0;
+      st.p[d.k] = v;
+      if (!st.custom) { st.custom = true; }
+      syncOutputs(); renderProps(); save();
+      if (d.auto) { const mm = currentMat(); const ph = { epsL: mm.epsL, epsOn: mm.epsOn }; $('p_epsL').placeholder = 'auto ' + nf(ph.epsL, 2); $('p_epsOn').placeholder = 'auto ' + nf(ph.epsOn, 2); }
+      scheduleRun(400);
+    }));
+  }
+
+  /* ---------- inicio ---------- */
+  window.EsponjaApp = { st, currentMat, foamColor, colors: () => C, nf, sig };
+  load();
+  readColors();
+  syncOutputs(); buildFicha(); renderProps(); drawLegend(); bind();
+  requestAnimationFrame(tick);
+  run();
+})();
+</script>
+<script>(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const A = window.EsponjaApp, S3 = window.Sponge3D;
+  const box = $('b3box'), cv = $('b3cv');
+  if (!A || !S3) return;
+  if (!window.THREE) {
+    $('b3tip').textContent = 'No se pudo cargar la biblioteca 3D (three.js). Revisa la conexión y recarga la página.';
+    return;
+  }
+  const THREE = window.THREE;
+  const st = A.st;
+
+  /* ---------- escena ---------- */
+  const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1.6, 0.002, 5);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8070, 0.75));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.75);
+  sun.position.set(0.12, 0.25, 0.1); sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.0015;
+  const sc = sun.shadow.camera; sc.left = -0.12; sc.right = 0.12; sc.top = 0.12; sc.bottom = -0.12; sc.near = 0.01; sc.far = 0.6;
+  scene.add(sun);
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.95 });
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), floorMat);
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  let grid = null;
+
+  const spongeMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0, side: THREE.DoubleSide });
+  const punchMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(0x6d777c).convertSRGBToLinear(), roughness: 0.35, metalness: 0.6 });
+  let sponge = null, geo = null, punchGrp = null;
+  let adjCount = null, nodeVal = null;
+  let running = true, visible = true;
+
+  function themeColors() {
+    const C = A.colors();
+    renderer.setClearColor(new THREE.Color(C.bg || '#eceeea'));
+    floorMat.color = new THREE.Color(C.surface || '#f8f9f6').convertSRGBToLinear();
+    if (grid) scene.remove(grid);
+    grid = new THREE.GridHelper(0.6, 60, new THREE.Color(C.line || '#cdd3ce').convertSRGBToLinear(), new THREE.Color(C.line || '#cdd3ce').convertSRGBToLinear());
+    grid.position.y = 0.0002; grid.material.transparent = true; grid.material.opacity = 0.7;
+    scene.add(grid);
+  }
+
+  /* ---------- simulación en un worker (no se frena con el dibujo) ---------- */
+  const ui = { base: 'free', muF: 0.6, muP: 0.8, fine: false };
+  const workerSrc = ($('src-engine').textContent || '') + '\n' + ($('src-engine3d').textContent || '') + '\n' + `
+    let sim = null, running = true, wall0 = 0, sim0 = 0, rate = 1, lastPost = 0;
+    function post() {
+      const c = sim.centroid();
+      const pos = Float32Array.from(sim.x), lm = Float32Array.from(sim.lminT);
+      const p = sim.punch;
+      const msg = { type: 'state', pos, lm, punch: { x: p.x, y: p.y, z: p.z, tx: p.tx, ty: p.ty, tz: p.tz, F: p.F, Fx: p.Fx, Fy: p.Fy }, t: sim.state.t, c, top: sim.topCenterZ(), rate, broken: sim.state.broken };
+      const tr = [pos.buffer, lm.buffer];
+      if (sim.state.brokenNew) { sim.state.brokenNew = false; msg.dead = Uint8Array.from(sim.dead); tr.push(msg.dead.buffer); }
+      postMessage(msg, tr);
+    }
+    function pump() {
+      if (!sim) return;
+      const t0 = performance.now();
+      if (running) {
+        const target = sim0 + (t0 - wall0) / 1000;
+        while (sim.state.t < target && performance.now() - t0 < 30) sim.step();
+        if (sim.state.t < target - 0.25) { sim0 = sim.state.t; wall0 = performance.now(); }
+        if (sim.state.unstable) { sim.reset(); wall0 = performance.now(); sim0 = 0; postMessage({ type: 'unstable' }); }
+      }
+      const now = performance.now();
+      if (now - lastPost > 30) { lastPost = now; post(); }
+      setTimeout(pump, 0);
+    }
+    let rT = 0, rS = 0;
+    setInterval(() => { if (!sim) return; const now = performance.now(); if (rT) rate = Math.min(1, (sim.state.t - rS) / ((now - rT) / 1000)); rT = now; rS = sim.state.t; }, 1000);
+    onmessage = ev => {
+      const d = ev.data;
+      if (d.type === 'init') {
+        sim = Sponge3D.createSim3D(d.cfg); wall0 = performance.now(); sim0 = 0;
+        postMessage({ type: 'mesh', mesh: { nn: sim.mesh.nn, nt: sim.mesh.nt, tets: sim.mesh.tets, X: sim.mesh.X }, R: sim.R, H: sim.H, a: sim.punch.a });
+        post(); if (!pump.started) { pump.started = true; pump(); }
+      } else if (!sim) return;
+      else if (d.type === 'target') { const p = sim.punch; p.tx = d.tx; p.ty = d.ty; p.tz = d.tz; }
+      else if (d.type === 'param') { sim.state.base = d.base; sim.state.muFloor = d.muF; sim.state.muPunch = d.muP; }
+      else if (d.type === 'reset') { sim.reset(); wall0 = performance.now(); sim0 = sim.state.t; post(); }
+      else if (d.type === 'run') { running = d.on; wall0 = performance.now(); sim0 = sim.state.t; }
+    };`;
+  let worker = null;
+  try { worker = new Worker(URL.createObjectURL(new Blob([workerSrc], { type: 'text/javascript' }))); } catch (e) { worker = null; }
+  if (!worker) { $('b3tip').textContent = 'Este navegador no permitió iniciar el cálculo 3D en segundo plano.'; return; }
+  // espejo local del estado
+  const sim = { R: 0.025, H: 0.05, punch: { x: 0, y: 0, z: 0.06, tx: 0, ty: 0, tz: 0.06, a: 0.01, F: 0, Fx: 0, Fy: 0 }, x: null, lminT: null, mesh: null, state: { t: 0 }, c: [0, 0, 0], top: 0.05, rate: 1 };
+  let m = null;
+  worker.onmessage = ev => {
+    const d = ev.data;
+    if (d.type === 'mesh') {
+      sim.mesh = d.mesh; sim.R = d.R; sim.H = d.H; sim.punch.a = d.a;
+      setupMesh();
+    } else if (d.type === 'state') {
+      sim.x = d.pos; sim.lminT = d.lm; { const q = d.punch; Object.assign(sim.punch, { x: q.x, y: q.y, z: q.z, F: q.F, Fx: q.Fx, Fy: q.Fy }); } sim.state.t = d.t; sim.c = d.c; sim.top = d.top; sim.rate = d.rate;
+      if (d.dead) { sim.dead = d.dead; refreshFaces(); }
+      if (d.broken !== sim.broken) { sim.broken = d.broken; showAlert(); }
+      dirty = true;
+    } else if (d.type === 'unstable') {
+      sim.broken = 0; sim.dead = new Uint8Array(sim.mesh.nt); refreshFaces();
+      sim.punch.tx = 0; sim.punch.ty = 0; sim.punch.tz = sim.H + 0.01; syncSliders();
+      showAlert('El cálculo se volvió inestable con ese movimiento y la esponja se reinició. Prueba moviendo el punzón más despacio o con menos hundimiento.');
+    }
+  };
+  let dirty = false, brokenNode = null;
+  function build() {
+    m = A.currentMat();
+    worker.postMessage({ type: 'init', cfg: { mat: m, R: st.R / 100, H: st.H / 100, a: Math.min(st.a / 100, 1.3 * st.R / 100), base: ui.base, muFloor: ui.muF, muPunch: ui.muP, speed: 0.012, n: ui.fine ? 8 : 6, nz: 6 } });
+  }
+  function setupMesh() {
+    const mesh = sim.mesh;
+    adjCount = new Float32Array(mesh.nn); nodeVal = new Float32Array(mesh.nn);
+    for (let e = 0; e < mesh.nt; e++) for (let k = 0; k < 4; k++) adjCount[mesh.tets[4 * e + k]]++;
+    if (sponge) { scene.remove(sponge); geo.dispose(); }
+    geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(3 * mesh.nn), 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(3 * mesh.nn), 3));
+    sim.dead = new Uint8Array(mesh.nt); sim.broken = 0; showAlert();
+    geo.setIndex(new THREE.BufferAttribute(boundaryFaces(), 1));
+    sponge = new THREE.Mesh(geo, spongeMat); sponge.castShadow = true; sponge.receiveShadow = true;
+    scene.add(sponge);
+    sim.punch.tx = 0; sim.punch.ty = 0; sim.punch.tz = sim.H + 0.01;
+    buildPunch(); syncSliders(); frameCamera();
+  }
+  // caras de borde de los tetraedros que siguen enteros (cambian cuando la esponja se rompe)
+  function boundaryFaces() {
+    const mesh = sim.mesh, T = mesh.tets, X = mesh.X, dead = sim.dead, nn = mesh.nn;
+    const F4 = [[0, 1, 2, 3], [0, 1, 3, 2], [0, 2, 3, 1], [1, 2, 3, 0]];
+    const map = new Map();
+    for (let e = 0; e < mesh.nt; e++) {
+      if (dead[e]) continue;
+      for (const f of F4) {
+        const a = T[4 * e + f[0]], b = T[4 * e + f[1]], c = T[4 * e + f[2]], o = T[4 * e + f[3]];
+        const s3 = [a, b, c].sort((p, q) => p - q), key = (s3[0] * nn + s3[1]) * nn + s3[2];
+        if (map.has(key)) map.delete(key); else map.set(key, [a, b, c, o]);
+      }
+    }
+    const out = new Uint32Array(map.size * 3); let k = 0;
+    for (const [a, b0, c0, o] of map.values()) {
+      let b = b0, c = c0;
+      const ux = X[3 * b] - X[3 * a], uy = X[3 * b + 1] - X[3 * a + 1], uz = X[3 * b + 2] - X[3 * a + 2];
+      const vx = X[3 * c] - X[3 * a], vy = X[3 * c + 1] - X[3 * a + 1], vz = X[3 * c + 2] - X[3 * a + 2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const ox = X[3 * o] - X[3 * a], oy = X[3 * o + 1] - X[3 * a + 1], oz = X[3 * o + 2] - X[3 * a + 2];
+      if (nx * ox + ny * oy + nz * oz > 0) { b = c0; c = b0; }
+      // el corte (x,y,z) → (x,z,y) de three.js invierte la orientación
+      out[k++] = a; out[k++] = c; out[k++] = b;
+    }
+    return out;
+  }
+  function refreshFaces() { if (geo) { geo.setIndex(new THREE.BufferAttribute(boundaryFaces(), 1)); dirty = true; } }
+  function showAlert(msg) {
+    const box = $('b3alert');
+    if (msg) { box.className = 'b3-alert warn'; $('b3alertH').textContent = 'Cálculo reiniciado'; $('b3alertTxt').textContent = msg; box.hidden = false; return; }
+    if (sim.broken > 0) {
+      box.className = 'b3-alert';
+      $('b3alertH').textContent = 'Ruptura detectada';
+      $('b3alertTxt').textContent = `${sim.broken} ${sim.broken === 1 ? 'elemento se desgarró' : 'elementos se desgarraron'}: sus paredes se estiraron más de ${A.nf(100 * (m.lamBreak - 1), 0)} %, el límite de este material${m.gf > 0.5 ? ' (frágil porque el sólido está vítreo)' : ''}. La zona rota queda marcada en rojo.`;
+      box.hidden = false;
+    } else box.hidden = true;
+  }
+  function buildPunch() {
+    if (punchGrp) scene.remove(punchGrp);
+    punchGrp = new THREE.Group();
+    const a = sim.punch.a, headH = Math.max(0.006, 0.5 * a);
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(a, a, headH, 48), punchMat);
+    head.position.y = headH / 2; head.castShadow = true;
+    const shaftR = Math.max(0.3 * a, 0.003);
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(shaftR, shaftR, 0.25, 24), punchMat);
+    shaft.position.y = headH + 0.125; shaft.castShadow = true;
+    head.userData.punch = true; shaft.userData.punch = true;
+    punchGrp.add(head, shaft);
+    scene.add(punchGrp);
+  }
+  function updateGeometry() {
+    if (!sim.x || !geo) return;
+    const mesh = sim.mesh, x = sim.x, pos = geo.attributes.position.array, col = geo.attributes.color.array;
+    for (let i = 0; i < mesh.nn; i++) { pos[3 * i] = x[3 * i]; pos[3 * i + 1] = x[3 * i + 2]; pos[3 * i + 2] = x[3 * i + 1]; }
+    nodeVal.fill(0);
+    for (let e = 0; e < mesh.nt; e++) { const c = 1 - sim.lminT[e]; for (let k = 0; k < 4; k++) nodeVal[mesh.tets[4 * e + k]] += c; }
+    if (!brokenNode || brokenNode.length !== mesh.nn) brokenNode = new Uint8Array(mesh.nn);
+    brokenNode.fill(0);
+    if (sim.broken) for (let e = 0; e < mesh.nt; e++) if (sim.dead[e]) for (let k = 0; k < 4; k++) brokenNode[mesh.tets[4 * e + k]] = 1;
+    for (let i = 0; i < mesh.nn; i++) {
+      const rgb = brokenNode[i] ? [200, 40, 30] : A.foamColor(nodeVal[i] / adjCount[i], m);
+      // a espacio lineal para el sombreado de three.js
+      col[3 * i] = Math.pow(rgb[0] / 255, 2.2); col[3 * i + 1] = Math.pow(rgb[1] / 255, 2.2); col[3 * i + 2] = Math.pow(rgb[2] / 255, 2.2);
+    }
+    geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true;
+    geo.computeVertexNormals(); geo.computeBoundingSphere();
+    punchGrp.position.set(sim.punch.x, sim.punch.z, sim.punch.y);
+  }
+
+  /* ---------- cámara orbital propia ---------- */
+  const orb = { az: 0.75, el: 0.42, dist: 0.3, tgt: new THREE.Vector3(0, 0.025, 0) };
+  function frameCamera() { orb.dist = Math.max(0.12, 5.2 * Math.max(sim.R, sim.H * 0.8)); orb.tgt.set(0, sim.H * 0.45, 0); placeCamera(); }
+  function placeCamera() {
+    const ce = Math.cos(orb.el);
+    camera.position.set(orb.tgt.x + orb.dist * ce * Math.sin(orb.az), orb.tgt.y + orb.dist * Math.sin(orb.el), orb.tgt.z + orb.dist * ce * Math.cos(orb.az));
+    camera.lookAt(orb.tgt);
+  }
+  function resize() {
+    const w = box.clientWidth, h = box.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(box);
+
+  // punteros: arrastrar el punzón (plano horizontal) o girar la cámara; pellizco para acercar
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const pointers = new Map(); let mode = null, last = null, pinch0 = 0, dist0 = 0;
+  function toNdc(ev) { const r = cv.getBoundingClientRect(); ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1); }
+  function hitPunch(ev) { toNdc(ev); ray.setFromCamera(ndc, camera); return ray.intersectObjects(punchGrp.children, false).length > 0; }
+  function planePoint(ev, y) {
+    toNdc(ev); ray.setFromCamera(ndc, camera);
+    const p = new THREE.Vector3(); return ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -y), p) ? p : null;
+  }
+  cv.addEventListener('pointerdown', ev => {
+    cv.setPointerCapture(ev.pointerId); pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); dist0 = orb.dist; mode = 'pinch'; return; }
+    mode = hitPunch(ev) ? 'punch' : 'orbit'; last = { x: ev.clientX, y: ev.clientY };
+    cv.classList.add('drag');
+    if (mode === 'punch') { const p = planePoint(ev, sim.punch.z); if (p) dragOff = { dx: sim.punch.x - p.x, dz: sim.punch.y - p.z }; }
+  });
+  let dragOff = { dx: 0, dz: 0 };
+  cv.addEventListener('pointermove', ev => {
+    if (!pointers.has(ev.pointerId)) return;
+    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (mode === 'pinch' && pointers.size === 2) { const [a, b] = [...pointers.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); orb.dist = Math.min(1.5, Math.max(0.05, dist0 * pinch0 / Math.max(d, 1))); placeCamera(); return; }
+    if (mode === 'orbit') {
+      orb.az -= (ev.clientX - last.x) * 0.008; orb.el = Math.min(1.45, Math.max(0.05, orb.el + (ev.clientY - last.y) * 0.006));
+      last = { x: ev.clientX, y: ev.clientY }; placeCamera();
+    } else if (mode === 'punch') {
+      const p = planePoint(ev, sim.punch.z);
+      if (p) { setTarget(p.x + dragOff.dx, p.z + dragOff.dz, null); }
+    }
+  });
+  const endPtr = ev => { pointers.delete(ev.pointerId); if (!pointers.size) { mode = null; cv.classList.remove('drag'); } };
+  cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+  cv.addEventListener('wheel', ev => { ev.preventDefault(); orb.dist = Math.min(1.5, Math.max(0.05, orb.dist * Math.exp(ev.deltaY * 0.001))); placeCamera(); }, { passive: false });
+  cv.addEventListener('keydown', ev => {
+    const s = 0.002, p = sim.punch;
+    const k = ev.key;
+    if (k === 'ArrowLeft') setTarget(p.tx - s, p.ty, null);
+    else if (k === 'ArrowRight') setTarget(p.tx + s, p.ty, null);
+    else if (k === 'ArrowUp') setTarget(p.tx, p.ty - s, null);
+    else if (k === 'ArrowDown') setTarget(p.tx, p.ty + s, null);
+    else if (k === '+' || k === '=') setTarget(p.tx, p.ty, p.tz + s);
+    else if (k === '-' || k === '_') setTarget(p.tx, p.ty, p.tz - s);
+    else return;
+    ev.preventDefault();
+  });
+
+  /* ---------- controles ---------- */
+  const lim = () => sim.R + sim.punch.a + 0.012;
+  function setTarget(x, y, z) {
+    const L = lim();
+    sim.punch.tx = Math.max(-L, Math.min(L, x)); sim.punch.ty = Math.max(-L, Math.min(L, y));
+    if (z !== null) sim.punch.tz = Math.max(0.0005, Math.min(sim.H + 0.015, z));
+    worker.postMessage({ type: 'target', tx: sim.punch.tx, ty: sim.punch.ty, tz: sim.punch.tz });
+    syncSliders();
+  }
+  function syncSliders() {
+    const L = lim() * 1000, p = sim.punch;
+    for (const id of ['b3x', 'b3y']) { $(id).min = String(-L.toFixed(1)); $(id).max = String(L.toFixed(1)); }
+    $('b3z').max = String(((sim.H + 0.015) * 1000).toFixed(1));
+    $('b3x').value = String(p.tx * 1000); $('b3y').value = String(p.ty * 1000); $('b3z').value = String(p.tz * 1000);
+    $('b3xOut').textContent = A.nf(p.tx * 1000, 1) + ' mm'; $('b3yOut').textContent = A.nf(p.ty * 1000, 1) + ' mm';
+    const sink = sim.H - p.tz;
+    $('b3zOut').textContent = A.nf(p.tz * 1000, 1) + ' mm' + (sink > 0 ? ' · ' + A.nf(100 * sink / sim.H, 0) + ' % bajo la tapa' : '');
+    $('b3muFOut').textContent = A.nf(ui.muF, 2); $('b3muPOut').textContent = A.nf(ui.muP, 2);
+    $('b3muF').value = String(ui.muF); $('b3muP').value = String(ui.muP);
+    $('b3free').setAttribute('aria-pressed', String(ui.base === 'free')); $('b3glued').setAttribute('aria-pressed', String(ui.base === 'glued'));
+    $('b3light').setAttribute('aria-pressed', String(!ui.fine)); $('b3fine').setAttribute('aria-pressed', String(ui.fine));
+  }
+  $('b3x').addEventListener('input', e => setTarget(+e.target.value / 1000, sim.punch.ty, null));
+  $('b3y').addEventListener('input', e => setTarget(sim.punch.tx, +e.target.value / 1000, null));
+  $('b3z').addEventListener('input', e => setTarget(sim.punch.tx, sim.punch.ty, +e.target.value / 1000));
+  $('b3up').addEventListener('click', () => setTarget(sim.punch.tx, sim.punch.ty, sim.H + 0.01));
+  $('b3center').addEventListener('click', () => setTarget(0, 0, null));
+  const sendParam = () => worker.postMessage({ type: 'param', base: ui.base, muF: ui.muF, muP: ui.muP });
+  $('b3alertReset').addEventListener('click', () => $('b3reset').click());
+  $('b3reset').addEventListener('click', () => { sim.punch.tx = 0; sim.punch.ty = 0; sim.punch.tz = sim.H + 0.01; worker.postMessage({ type: 'reset' }); syncSliders(); });
+  $('b3pause').addEventListener('click', () => { running = !running; worker.postMessage({ type: 'run', on: running && visible }); $('b3pause').textContent = running ? 'Pausa' : 'Seguir'; });
+  $('b3muF').addEventListener('input', e => { ui.muF = +e.target.value; sendParam(); syncSliders(); });
+  $('b3muP').addEventListener('input', e => { ui.muP = +e.target.value; sendParam(); syncSliders(); });
+  $('b3free').addEventListener('click', () => { ui.base = 'free'; sendParam(); syncSliders(); });
+  $('b3glued').addEventListener('click', () => { ui.base = 'glued'; build(); syncSliders(); });
+  $('b3light').addEventListener('click', () => { if (ui.fine) { ui.fine = false; build(); } syncSliders(); });
+  $('b3fine').addEventListener('click', () => { if (!ui.fine) { ui.fine = true; build(); } syncSliders(); });
+
+  const sigOf = () => JSON.stringify([st.p, st.T, st.RH, st.R, st.H, st.a]);
+  let lastSig = '';
+  window.addEventListener('esponja:config', () => { clearTimeout(cfgT); cfgT = setTimeout(() => { const sgn = sigOf(); if (sgn !== lastSig) { lastSig = sgn; build(); } }, 50); });
+  window.addEventListener('esponja:theme', themeColors);
+  let cfgT = 0;
+  new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); worker.postMessage({ type: 'run', on: running && visible }); }).observe(box);
+
+  /* ---------- lecturas ---------- */
+  let lastStats = 0;
+  function stats() {
+    const p = sim.punch, c = sim.c;
+    const shift = Math.hypot(c[0], c[1]);
+    const sink = Math.max(0, sim.H - p.z);
+    const items = [
+      ['Fuerza vertical', A.sig(p.F, 3) + ' N', sink > 0 ? 'cara ' + A.nf(sink * 1000, 1) + ' mm bajo la tapa original' : 'punzón sobre la tapa'],
+      ['Fuerza lateral', A.sig(Math.hypot(p.Fx, p.Fy), 3) + ' N', 'arrastre o empuje de costado'],
+      ['Esponja desplazada', A.nf(shift * 1000, 1) + ' mm', 'centro de masa en el suelo'],
+      ['Altura central', A.nf(100 * sim.top / sim.H, 1) + ' %', 'de la tapa respecto de su alto']
+    ];
+    $('b3stats').innerHTML = items.map(([l, v, s]) => `<div class="stat"><span class="label">${l}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join('');
+    $('b3time').textContent = 't = ' + A.nf(sim.state.t, 1) + ' s simulados · ' + (sim.rate >= 0.95 ? 'tiempo real' : A.nf(sim.rate, 2) + '× tiempo real');
+  }
+
+  function loop(ts) {
+    if (visible && geo) {
+      if (dirty) { dirty = false; updateGeometry(); }
+      renderer.render(scene, camera);
+      if (ts - lastStats > 200 && sim.x) { lastStats = ts; stats(); syncOuts(); }
+    }
+    requestAnimationFrame(loop);
+  }
+  function syncOuts() {
+    const p = sim.punch, sink = sim.H - p.z;
+    $('b3zOut').textContent = A.nf(p.tz * 1000, 1) + ' mm' + (sim.H - p.tz > 0 ? ' · ' + A.nf(100 * (sim.H - p.tz) / sim.H, 0) + ' % bajo la tapa' : '');
+  }
+
+  themeColors();
+  lastSig = sigOf(); build(); resize();
+  requestAnimationFrame(loop);
+})();
+</script>
